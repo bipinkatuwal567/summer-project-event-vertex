@@ -1,15 +1,20 @@
 import mongoose from "mongoose";
+import bycrypt from "bcryptjs"
 
 const userSchema = mongoose.Schema({
     username: {
         type: String,
         required: true,
         unique: true,
+        lowercase: true,
+        trim: true,
+        index: true,
     }, 
     email: {
         type: String,
         required: true,
         unique: true,
+        lowercase: true,
     }, 
     password: {
         type: String,
@@ -25,6 +30,17 @@ const userSchema = mongoose.Schema({
     },
     
 }, {Timestamp: true})
+
+userSchema.pre("save", async function (next) {
+    if(!this.isModified("password")) return next();
+
+    this.password = await bycrypt.hash(this.password, 10)
+    next()
+})
+
+userSchema.methods.isPasswordCorrect = async function(password){
+    return await bycrypt.compare(password, this.password);
+}
 
 const User = mongoose.model('User', userSchema);
 
