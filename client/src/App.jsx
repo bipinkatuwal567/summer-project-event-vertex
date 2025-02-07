@@ -1,14 +1,21 @@
 import { useState } from 'react'
 import Header from './components/Header'
-import HeroSection from './components/HeroSection'
+import { BrowserRouter, Route, Routes } from 'react-router'
+import Home from './pages/Home.jsx'
 
 function App() {
 
   return (
-    <div className='w-full flex flex-col min-h-screen bg-gray-100'>
-      <Header />
-      <HeroSection />
-    </div>
+    <BrowserRouter>
+
+      <div className='w-full flex flex-col min-h-screen bg-gray-100'>
+        <Header />
+
+        <Routes>
+          <Route path='/' element={<Home />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   )
 }
 

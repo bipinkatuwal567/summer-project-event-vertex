@@ -1,10 +1,13 @@
 import React from 'react'
 import Logo from "../assets/logos.png"
+import { Link } from 'react-router'
 
 const Header = () => {
     return (
-        <nav className='w-full px-8 md:px-16 py-3 border-b flex justify-between items-center'>
-            <img src={Logo} className='w-8' alt="Logo" />
+        <nav className='w-full px-8 md:px-16 py-3 border-b border-slate-300 flex justify-between items-center fixed'>
+            <Link to={"/"}>
+                <img src={Logo} className='w-8' alt="Logo" />
+            </Link>
             <div className='flex gap-12'>
                 {/* <a className='hover:underline' href="#">Home</a>
                 <a className='hover:underline' href="#">Events</a>

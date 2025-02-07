@@ -3,6 +3,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import sliderData from "../data/sliderData.json";
+import { ArrowRight } from 'lucide-react';
 
 const HeroSection = () => {
   console.log(sliderData);
@@ -41,14 +42,15 @@ const HeroSection = () => {
   return (
     <main className="flex flex-col flex-grow w-full mx-auto justify-center">
     <div className="flex flex-col max-w-3xl px-6 md:px-12 mx-auto justify-center items-center text-center space-y-6">
-      <h2 className="text-4xl md:text-6xl font-marcellus font-bold leading-tight">
+      <h2 className="text-4xl md:text-6xl font-marcellus leading-tight">
         Experience Events Like Never Before.
       </h2>
       <p className="max-w-2xl text-lg md:text-xl text-gray-700">
         Lorem ipsum dolor sit amet consectetur. Ac enim tristique blandit fringilla enim consequat. Odio pellentesque aliquam scelerisque elit leo.
       </p>
-      <button className="bg-primary text-white py-3 px-8 rounded-full text-lg shadow-md hover:bg-primary-dark transition">
-        Login
+      <button className="bg-primary text-white py-1 px-1 pl-3 rounded-full text-lg shadow-md hover:bg-primary-dark transition flex items-center gap-2">
+        Get Started
+        <ArrowRight className="bg-white p-1 w-8 h-8 text-black rounded-full" />
       </button>
     </div>
 
