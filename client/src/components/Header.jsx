@@ -1,6 +1,7 @@
 import React from 'react'
 import Logo from "../assets/logos.png"
 import { Link } from 'react-router'
+import Button from './ui/Button'
 
 const Header = () => {
     return (
@@ -14,7 +15,9 @@ const Header = () => {
                 <a className='hover:underline' href="#">Create an event</a>
                 <a className='hover:underline' href="#">About us</a> */}
             </div>
-            <button className='bg-primary text-white py-2 px-6 rounded-full shadow-md hover:bg-slate-800 transition'>Login</button>
+            <Link to={"/sign-up"}>
+                <Button title={"Register"} />
+            </Link>
         </nav>
     )
 }
