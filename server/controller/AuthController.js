@@ -1,6 +1,6 @@
 import User from "../model/UserModel.js";
 import bycrypt from "bcryptjs";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
 export const SignUp = async (req, res, next) => {
   try {
@@ -57,14 +57,14 @@ export const Login = async (req, res, next) => {
     const { email, password } = req.body;
 
     if (!email || !password || email === "" || password === "") {
-        return res.status(401).json({
-            status: false, 
-            message: "All fields are required!"
-        });
-      }
+      return res.status(401).json({
+        status: false,
+        message: "All fields are required!",
+      });
+    }
 
     // Check if user exist with email
-    const existingUser = await User.findOne({email});
+    const existingUser = await User.findOne({ email });
 
     if (!existingUser) {
       return res.status(401).json({
@@ -86,20 +86,25 @@ export const Login = async (req, res, next) => {
       });
     }
 
-    // Generate JWT Token 
-    const token = jwt.sign({
-        email: existingUser.email
-    }, process.env.JWT_SECRET_KEY)
+    // Generate JWT Token
+    const token = jwt.sign(
+      {
+        email: existingUser.email,
+      },
+      process.env.JWT_SECRET_KEY
+    );
 
-    const {password: pass, ...restData} = existingUser._doc;
+    const { password: pass, ...restData } = existingUser._doc;
 
-    res.status(200).cookie("access_token", token, {
+    res
+      .status(200)
+      .cookie("access_token", token, {
         httpOnly: true,
-    }).json({
-        status: true, 
-        data: restData
-    })
-
+      })
+      .json({
+        status: true,
+        data: restData,
+      });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Login failed!" });

@@ -3,23 +3,25 @@ import Header from './components/Header'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import Home from './pages/Home.jsx'
 import Signup from './pages/Signup.jsx'
+import MainLayout from './components/MainLayout.jsx'
+import AuthLayout from './components/AuthLayout.jsx'
 
 function App() {
 
   return (
     <BrowserRouter>
 
-      <div className='w-full flex flex-col min-h-screen bg-gray-100'>
-        <Header />
-
-        <Routes>
+      <Routes>
+        <Route element={<MainLayout />}>
           <Route path='/' element={<Home />} />
+        </Route>
 
-          {/* Auth related routes */}
+        {/* Auth related routes */}
+        <Route element={<AuthLayout />}>
           <Route path='/sign-up' element={<Signup />} />
-        </Routes>
-      </div>
-    </BrowserRouter>
+        </Route>
+      </Routes>
+    </BrowserRouter >
   )
 }
 
