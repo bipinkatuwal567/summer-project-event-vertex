@@ -2,10 +2,29 @@ import React from 'react'
 import Logo from "../assets/logos.png"
 import { Link } from 'react-router'
 import Button from './ui/Button'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+    signOutSuccess
+} from "../redux/user/userSlice"
 
 const Header = () => {
+    const dispatch = useDispatch();
     const { currentUser } = useSelector(state => state.user)
+
+    const handleSignout = async () => {
+        try {
+            const res = await fetch("/api/auth/signout", { method: "GET" })
+            const data = await res.json;
+
+            if (res.ok) {
+                dispatch(signOutSuccess());
+            } else {
+                console.log(data.message);
+            }
+        } catch (error) {
+            console.log(error, "something went wrong while signning out the user");
+        }
+    }
 
     return (
         <nav className='w-full px-8 md:px-16 py-3 border-b border-slate-300 flex justify-between items-center fixed'>
@@ -29,7 +48,7 @@ const Header = () => {
                         tabIndex={0}
                         className="menu dropdown-content bg-gray-200 rounded-box z-[1] mt-4 w-52 p-2 shadow">
                         <li><a>{currentUser.username}</a></li>
-                        <li><a>Sign out</a></li>
+                        <li onClick={handleSignout}><a>Sign out</a></li>
                     </ul>
                 </div> : <Link to={"/sign-up"}>
                     <Button title={"Register"} />
