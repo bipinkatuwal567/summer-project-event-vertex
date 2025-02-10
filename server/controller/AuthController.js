@@ -110,3 +110,15 @@ export const Login = async (req, res, next) => {
     res.status(500).json({ error: "Login failed!" });
   }
 };
+
+export const Signout = (req, res, next) => {
+  try {
+    res.clearCookie("access_token").status(200).json("User has been signed out");
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({
+      status: false, 
+      message: error.message || "Unable to sign out the user"
+    })
+  }
+};
