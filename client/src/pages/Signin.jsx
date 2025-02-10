@@ -1,19 +1,28 @@
 import React, { useState } from 'react'
 import Logo from "../assets/logos.png"
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
-import Button from '../components/ui/Button';
 import GoogleIcon from "../assets/google.png"
-import AuthHeroImg from "../assets/auth-hero.jpg";
+import AuthHeroImg from "../assets/sign-in-hero.avif";
 import { Link, useNavigate } from 'react-router';
 import SyncLoader from "react-spinners/SyncLoader";
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    signInStart,
+    signInSuccess,
+    signInFailure,
+} from "../redux/user/userSlice"
 
 const Signin = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({})
-    const [isLoading, setIsLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState(null);
     const [isHovered, setIsHovered] = useState(false);
+
+    const { loading: isLoading, error: errorMessage } = useSelector((state) => ({
+        loading: state.user?.loading || false,
+        error: state.user?.error || null
+    }))
 
     console.log(formData);
 
@@ -25,20 +34,20 @@ const Signin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.username || formData.username.trim() === "" ||
-            !formData.email || formData.email.trim() === "" ||
+        if (!formData.email || formData.email.trim() === "" ||
             !formData.password || formData.password.trim() === "") {
-            setErrorMessage("Please fill up all the fields!")
+            dispatch(signInFailure("Please fill up all the fields!"))
         }
 
         try {
-            setIsLoading(true);
-            setErrorMessage(null)
-
-            const res = await fetch("api/auth/signup", {
+            dispatch(signInStart())
+            const res = await fetch("api/auth/signin", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    email: formData.email.toLowerCase().trim(),
+                    password: formData.password.trim()
+                })
             })
 
             const data = await res.json();
@@ -46,18 +55,15 @@ const Signin = () => {
             console.log(data);
 
             if (!res.ok) {
-                setIsLoading(false);
                 console.log("Sign up error response: ", data);
-
-                setErrorMessage(data.message || "Signup failed")
+                dispatch(signInFailure(data.message || "Signup failed"))
             }
 
-            setIsLoading(false);
-            navigate("/sign-in")
+            dispatch(signInSuccess(data))
+            navigate("/")
         } catch (error) {
-            setIsLoading(false)
+            dispatch(signInFailure(error.message || "An unexpected error occurred"))
             console.log("Sign up catch error: ", error);
-            setErrorMessage(error.message || "An unexpected error occurred")
         }
     }
 
@@ -83,7 +89,7 @@ const Signin = () => {
                     <p className='text-slate-500'>Let's sign you in</p>
 
                     <div className='flex flex-col gap-3 mt-4 w-full items-start'>
-                    
+
                         <div className='flex flex-col gap-1 w-full items-start'>
                             <label
                                 htmlFor="email"
