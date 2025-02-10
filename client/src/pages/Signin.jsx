@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Logo from "../assets/logos.png"
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import GoogleIcon from "../assets/google.png"
@@ -23,6 +23,10 @@ const Signin = () => {
         loading: state.user?.loading || false,
         error: state.user?.error || null
     }))
+
+    const userState = useSelector(state => state.user)
+    console.log(userState);
+    
 
     console.log(formData);
 
@@ -59,13 +63,19 @@ const Signin = () => {
                 dispatch(signInFailure(data.message || "Signup failed"))
             }
 
-            dispatch(signInSuccess(data))
+            dispatch(signInSuccess(data.data))
             navigate("/")
         } catch (error) {
             dispatch(signInFailure(error.message || "An unexpected error occurred"))
             console.log("Sign up catch error: ", error);
         }
     }
+
+    useEffect(() => {
+        if(userState.currentUser){
+            navigate("/")
+        }
+    }, [useState])
 
     return (
         <main className="min-h-screen w-full flex mx-auto justify-center items-center text-center">

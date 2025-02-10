@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Logo from "../assets/logos.png"
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Button from '../components/ui/Button';
@@ -6,6 +6,7 @@ import GoogleIcon from "../assets/google.png"
 import AuthHeroImg from "../assets/auth-hero.jpg";
 import { Link, useNavigate } from 'react-router';
 import SyncLoader from "react-spinners/SyncLoader";
+import { useSelector } from 'react-redux';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Signup = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
     const [isHovered, setIsHovered] = useState(false);
+    const { currentUser } = useSelector(state => state.user)
 
     console.log(formData);
 
@@ -60,6 +62,12 @@ const Signup = () => {
             setErrorMessage(error.message || "An unexpected error occurred")
         }
     }
+
+    useEffect(() => {
+        if(currentUser){
+            navigate("/")
+        }
+    }, [currentUser])
 
     return (
         <main className="min-h-screen w-full flex mx-auto justify-center items-center text-center">

@@ -7,7 +7,6 @@ import sliderData from "../data/sliderData.json";
 import Button from "./ui/Button";
 
 const HeroSection = () => {
-  console.log(sliderData);
 
   const settings = {
     infinite: true,
