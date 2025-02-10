@@ -40,7 +40,11 @@ const Signup = () => {
             const res = await fetch("api/auth/signup", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    username: formData.username.toLowerCase().trim(),
+                    email: formData.email.toLowerCase().trim(),
+                    password: formData.password
+                })
             })
 
             const data = await res.json();
@@ -52,6 +56,7 @@ const Signup = () => {
                 console.log("Sign up error response: ", data);
 
                 setErrorMessage(data.message || "Signup failed")
+                return;
             }
 
             setIsLoading(false);

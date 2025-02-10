@@ -21,7 +21,7 @@ const userSchema = mongoose.Schema({
     }, 
     profilePicture: {
         type: String,
-        default: "https://imgs.search.brave.com/skDNwq7zZQO3Fx033dB2EKjvJZNncIpdZ3hk47OSVTU/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly93d3cu/ZWxldmVuZm9ydW0u/Y29tL2RhdGEvYXR0/YWNobWVudHMvODIv/ODI1MjktYWRlNjNl/NDIwOTcwOTI5MjE4/M2Y2NTQ5MDdiMTY4/ZjUuanBnP2hhc2g9/cmVZLVFnbHdrcA"
+        default: "https://cdn-icons-png.flaticon.com/128/9073/9073143.png"
     }, 
     role: {
         type: String,
