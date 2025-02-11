@@ -1,5 +1,5 @@
 import User from "../model/UserModel.js";
-import bycrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const SignUp = async (req, res, next) => {
@@ -31,7 +31,7 @@ export const SignUp = async (req, res, next) => {
     }
 
     // Hash the password
-    const hashedPassword = await bycrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create new user
     const newUser = new User({
@@ -74,7 +74,7 @@ export const Login = async (req, res, next) => {
     }
 
     // Compare password
-    const comparePassword = await bycrypt.compareSync(
+    const comparePassword = await bcrypt.compareSync(
       password,
       existingUser.password
     );
@@ -111,14 +111,87 @@ export const Login = async (req, res, next) => {
   }
 };
 
+export const GoogleLogin = async (req, res, next) => {
+  const { username, email, googlePhotoUrl, role } = req.body;
+
+  try {
+    const userExist = await User.findOne({ email });
+
+    if (userExist) {
+      const token = jwt.sign(
+        {
+          id: userExist._id,
+          role: userExist.role,
+        },
+        process.env.JWT_SECRET_KEY
+      );
+
+      const { password, ...restData } = userExist._doc;
+
+      return res
+        .status(200)
+        .cookie("access_token", token, {
+          httpOnly: true,
+        })
+        .json(restData);
+    } else {
+
+      // If user doesn't exists creat a new one
+      const generateRandomPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
+
+      const hashedPassword = bcrypt.hashSync(generateRandomPassword, 10);
+
+      const newUser = new User({
+        username:
+          username.toLowerCase().split(" ").join("") +
+          Math.random().toString(9).slice(-4),
+        email,
+        password: hashedPassword,
+        profilePicture: googlePhotoUrl,
+        role: role === "organizer" || role === "admin" ? "attendee" : role, // Secure role assignment
+      });
+
+      await newUser.save();
+
+      const token = jwt.sign(
+        {
+          id: newUser._id,
+          role: newUser.role,
+        },
+        process.env.JWT_SECRET_KEY
+      );
+
+      const { password, ...restData } = newUser._doc;
+
+      res
+        .status(200)
+        .cookie("access_token", token, {
+          httpOnly: true,
+        })
+        .json(restData);
+    }
+  } catch (error) {
+    console.log("Google auth error", error);
+    return res.status(401).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
 export const Signout = (req, res, next) => {
   try {
-    res.clearCookie("access_token").status(200).json("User has been signed out");
+    res
+      .clearCookie("access_token")
+      .status(200)
+      .json("User has been signed out");
   } catch (error) {
     console.log(error);
     res.status(401).json({
-      status: false, 
-      message: error.message || "Unable to sign out the user"
-    })
+      status: false,
+      message: error.message || "Unable to sign out the user",
+    });
   }
 };
