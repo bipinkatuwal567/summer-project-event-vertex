@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import Logo from "../assets/logos.png"
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
-import Button from '../components/ui/Button';
-import GoogleIcon from "../assets/google.png"
+
 import AuthHeroImg from "../assets/auth-hero.jpg";
 import { Link, useNavigate } from 'react-router';
 import SyncLoader from "react-spinners/SyncLoader";
 import { useSelector } from 'react-redux';
+import GoogleAuth from '../components/GoogleAuth';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -16,8 +16,6 @@ const Signup = () => {
     const [errorMessage, setErrorMessage] = useState(null);
     const [isHovered, setIsHovered] = useState(false);
     const { currentUser } = useSelector(state => state.user)
-
-    console.log(formData);
 
 
     const handleChange = (e) => {
@@ -41,8 +39,8 @@ const Signup = () => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    username: formData.username.toLowerCase().trim(),
-                    email: formData.email.toLowerCase().trim(),
+                    username: formData.username.toLowerCase().split(" ").join(""),
+                    email: formData.email.toLowerCase().split(" ").join(""),
                     password: formData.password
                 })
             })
@@ -144,10 +142,7 @@ const Signup = () => {
                             }
                         </button>
                         <p className='text-slate-500'>or</p>
-                        <button className='flex items-center gap-2 h-12 rounded-full transition-all duration-300 w-full justify-center bg-slate-200 hover:bg-slate-300'>
-                            <img src={GoogleIcon} className='w-4 h-4' />
-                            Register with Google
-                        </button>
+                        <GoogleAuth />
                     </div>
 
                     <p className='text-slate-600'>Already have an account? <Link to={"/sign-in"}><span className='text-black underline'>Sign in</span></Link></p>

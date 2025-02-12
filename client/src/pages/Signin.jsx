@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Logo from "../assets/logos.png"
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
-import GoogleIcon from "../assets/google.png"
 import AuthHeroImg from "../assets/sign-in-hero.avif";
 import { Link, useNavigate } from 'react-router';
 import SyncLoader from "react-spinners/SyncLoader";
@@ -11,6 +10,7 @@ import {
     signInSuccess,
     signInFailure,
 } from "../redux/user/userSlice"
+import GoogleAuth from '../components/GoogleAuth';
 
 const Signin = () => {
     const navigate = useNavigate();
@@ -138,10 +138,7 @@ const Signin = () => {
                             }
                         </button>
                         <p className='text-slate-500'>or</p>
-                        <button className='flex items-center gap-2 h-12 rounded-full transition-all duration-300 w-full justify-center bg-slate-200 hover:bg-slate-300'>
-                            <img src={GoogleIcon} className='w-4 h-4' />
-                            Sign in with Google
-                        </button>
+                        <GoogleAuth />
                     </div>
 
                     <p className='text-slate-600'>Don't have an account? <Link to={"/sign-up"}><span className='text-black underline'>Sign up</span></Link></p>

@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 export const SignUp = async (req, res, next) => {
   try {
     const { username, email, password, role } = req.body;
+    
 
     // Check if user fills up all the required fields
     if (
@@ -35,7 +36,7 @@ export const SignUp = async (req, res, next) => {
 
     // Create new user
     const newUser = new User({
-      username,
+      username: username.toLowerCase().split(" ").join(""),
       email,
       password: hashedPassword,
       role: role === "organizer" || role === "admin" ? "attendee" : role, // Secure role assignment
@@ -113,6 +114,8 @@ export const Login = async (req, res, next) => {
 
 export const GoogleLogin = async (req, res, next) => {
   const { username, email, googlePhotoUrl, role } = req.body;
+  
+  
 
   try {
     const userExist = await User.findOne({ email });

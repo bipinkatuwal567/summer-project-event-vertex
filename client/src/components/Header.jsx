@@ -41,12 +41,12 @@ const Header = () => {
                 currentUser ? <div className="dropdown dropdown-end">
                     <div tabIndex={0} className="avatar">
                         <div className="w-10 rounded-full ring-2 ring-gray-300">
-                            <img className='w-full h-full' src={currentUser.profilePicture} />
+                            <img className='w-full h-full' src={currentUser.profilePicture} referrerPolicy="no-referrer" />
                         </div>
                     </div>
                     <ul
                         tabIndex={0}
-                        className="menu dropdown-content bg-gray-200 rounded-box z-[1] mt-4 w-52 p-2 shadow">
+                        className="menu dropdown-content bg-gray-100 border border-gray-300 rounded-lg z-[1] mt-4 p-2 shadow">
                         <li><a>{currentUser.username}</a></li>
                         <li onClick={handleSignout}><a>Sign out</a></li>
                     </ul>
