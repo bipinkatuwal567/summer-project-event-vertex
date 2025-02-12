@@ -3,6 +3,8 @@ import Logo from "../assets/logos.png"
 import { Link } from 'react-router'
 import Button from './ui/Button'
 import { useDispatch, useSelector } from 'react-redux'
+import { LogOut } from 'lucide-react';
+
 import {
     signOutSuccess
 } from "../redux/user/userSlice"
@@ -38,21 +40,31 @@ const Header = () => {
                 <a className='hover:underline' href="#">About us</a> */}
             </div>
             {
-                currentUser ? <div className="dropdown dropdown-end">
-                    <div tabIndex={0} className="avatar">
-                        <div className="w-10 rounded-full ring-2 ring-gray-300">
-                            <img className='w-full h-full' src={currentUser.profilePicture} referrerPolicy="no-referrer" />
+                currentUser ?
+                    <>
+                        <div className="dropdown dropdown-end">
+                            <div tabIndex={0} className="avatar">
+                                <div className="w-10 rounded-full ring-2 ring-gray-300">
+                                    <img className='w-full h-full' src={currentUser.profilePicture} referrerPolicy="no-referrer" />
+                                </div>
+                            </div>
+                            <ul
+                                tabIndex={0}
+                                className="menu dropdown-content bg-gray-100 border border-gray-300 rounded-lg z-[1] mt-4 shadow flex px-2 justify-center items-center">
+                                <div className='flex flex-col px-1 gap-2'>
+                                    <p className='font-medium'>Signed in as:</p>
+                                    <p className='font-medium cap'>{currentUser.email}</p>
+                                </div>
+                                <div className='mt-2 w-full border-t-2 pt-1 border-gray-200'>
+                                <li className='hover:bg-gray-200 rounded-md'><a className='p-2 text-gray-600'>Manage Account</a></li>
+                                <li className='hover:bg-gray-200 rounded-md' onClick={handleSignout}><a className='p-2 text-gray-600'>Sign out <LogOut className='w-4' /></a></li>
+                                </div>
+                            </ul>
                         </div>
-                    </div>
-                    <ul
-                        tabIndex={0}
-                        className="menu dropdown-content bg-gray-100 border border-gray-300 rounded-lg z-[1] mt-4 p-2 shadow">
-                        <li><a>{currentUser.username}</a></li>
-                        <li onClick={handleSignout}><a>Sign out</a></li>
-                    </ul>
-                </div> : <Link to={"/sign-up"}>
-                    <Button title={"Register"} />
-                </Link>
+                    </>
+                    : <Link to={"/sign-up"}>
+                        <Button title={"Register"} />
+                    </Link>
             }
 
         </nav>
