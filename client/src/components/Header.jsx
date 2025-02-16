@@ -56,7 +56,7 @@ const Header = () => {
                                     <p className='font-medium cap'>{currentUser.email}</p>
                                 </div>
                                 <div className='mt-2 w-full border-t-2 pt-1 border-gray-200'>
-                                <li className='hover:bg-gray-200 rounded-md'><a className='p-2 text-gray-600'>Manage Account</a></li>
+                                <li className='hover:bg-gray-200 rounded-md'><Link to={"/user-dashboard"} className='p-2 text-gray-600'>Manage Account</Link></li>
                                 <li className='hover:bg-gray-200 rounded-md' onClick={handleSignout}><a className='p-2 text-gray-600'>Sign out <LogOut className='w-4' /></a></li>
                                 </div>
                             </ul>

@@ -6,6 +6,8 @@ import Signup from './pages/Signup.jsx'
 import MainLayout from './components/MainLayout.jsx'
 import AuthLayout from './components/AuthLayout.jsx'
 import Signin from './pages/Signin.jsx'
+import PrivateRoute from './components/PrivateRoute.jsx'
+import UserDashboard from './pages/UserDashboard.jsx'
 
 function App() {
 
@@ -21,6 +23,11 @@ function App() {
         <Route element={<AuthLayout />}>
           <Route path='/sign-up' element={<Signup />} />
           <Route path='/sign-in' element={<Signin />} />
+        </Route>
+
+        {/* Private route for authenticated users */}
+        <Route element={<PrivateRoute />}>
+        <Route path='/user-dashboard' element={<UserDashboard />} />
         </Route>
       </Routes>
     </BrowserRouter >
