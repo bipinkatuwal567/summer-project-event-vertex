@@ -5,12 +5,14 @@ import authRoutes from "./routes/AuthRoutes.js"
 import userRoutes from "./routes/UserRoutes.js"
 import connectDB from "./db/database.js";
 import cors from "cors"
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json()); // this line allow json in backend
 app.use(cors());
+app.use(cookieParser());
 
 
 connectDB()

@@ -11,6 +11,7 @@ import {
     signInFailure,
 } from "../redux/user/userSlice"
 import GoogleAuth from '../components/GoogleAuth';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Signin = () => {
     const navigate = useNavigate();
@@ -40,6 +41,7 @@ const Signin = () => {
 
         if (!formData.email || formData.email.trim() === "" ||
             !formData.password || formData.password.trim() === "") {
+                toast.error("Please fill up all the fields!")
             dispatch(signInFailure("Please fill up all the fields!"))
         }
 
@@ -59,12 +61,14 @@ const Signin = () => {
             console.log(data);
 
             if (!res.ok) {
+                toast.error(data.message)
                 console.log("Sign up error response: ", data);
                 dispatch(signInFailure(data.message || "Signup failed"))
-            }
-
-            dispatch(signInSuccess(data.data))
+            }else{
+                toast.success("Signed up successfully")
+                dispatch(signInSuccess(data.data))
             navigate("/")
+            }
         } catch (error) {
             dispatch(signInFailure(error.message || "An unexpected error occurred"))
             console.log("Sign up catch error: ", error);
@@ -79,7 +83,7 @@ const Signin = () => {
 
     return (
         <main className="min-h-screen w-full flex mx-auto justify-center items-center text-center">
-
+            <Toaster position='bottom-right' />
             {/* Image Section */}
             <div className='hidden relative lg:flex w-full h-screen max-h-screen max-w-screen p-2'>
                 <img className='w-full h-full object-cover rounded-3xl' src={AuthHeroImg} alt="Auth Background" />
