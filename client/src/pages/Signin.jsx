@@ -27,7 +27,7 @@ const Signin = () => {
 
     const userState = useSelector(state => state.user)
     console.log(userState);
-    
+
 
     console.log(formData);
 
@@ -41,7 +41,7 @@ const Signin = () => {
 
         if (!formData.email || formData.email.trim() === "" ||
             !formData.password || formData.password.trim() === "") {
-                toast.error("Please fill up all the fields!")
+            toast.error("Please fill up all the fields!")
             dispatch(signInFailure("Please fill up all the fields!"))
         }
 
@@ -64,10 +64,10 @@ const Signin = () => {
                 toast.error(data.message)
                 console.log("Sign up error response: ", data);
                 dispatch(signInFailure(data.message || "Signup failed"))
-            }else{
+            } else {
                 toast.success("Signed up successfully")
                 dispatch(signInSuccess(data.data))
-            navigate("/")
+                navigate("/")
             }
         } catch (error) {
             dispatch(signInFailure(error.message || "An unexpected error occurred"))
@@ -76,7 +76,7 @@ const Signin = () => {
     }
 
     useEffect(() => {
-        if(userState.currentUser){
+        if (userState.currentUser) {
             navigate("/")
         }
     }, [useState])
@@ -142,11 +142,11 @@ const Signin = () => {
                             }
                         </button>
                         <p className='text-slate-500'>or</p>
-                        <GoogleAuth />
                     </div>
 
-                    <p className='text-slate-600'>Don't have an account? <Link to={"/sign-up"}><span className='text-black underline'>Sign up</span></Link></p>
                 </form>
+                <GoogleAuth />
+                <p className='text-slate-600'>Don't have an account? <Link to={"/sign-up"}><span className='text-black underline'>Sign up</span></Link></p>
             </div>
         </main>
     )

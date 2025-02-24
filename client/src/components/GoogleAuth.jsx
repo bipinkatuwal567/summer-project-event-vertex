@@ -41,7 +41,7 @@ const GoogleAuth = () => {
         }
     }
     return (
-        <button onClick={handleClick} className='flex items-center gap-2 h-12 rounded-full transition-all duration-300 w-full justify-center bg-slate-200 hover:bg-slate-300'>
+        <button onClick={handleClick} className='flex max-w-sm items-center gap-2 h-12 rounded-full transition-all duration-300 w-full justify-center bg-slate-200 hover:bg-slate-300'>
             <img src={GoogleIcon} className='w-4 h-4' />
             Register with Google
         </button>
