@@ -13,13 +13,19 @@ export default {
   theme: {
   	extend: {
   		backgroundColor: {
-  			'primary': '#001230'
+  			'primary': '#001230', 
+			'primary-blue': "#2563EB", 
+			"hover-blue": "#1A4EC2"
   		},
   		fontFamily: {
   			marcellus: [
   				'Marcellus',
   				'sans-serif'
-  			]
+  			], 
+			inter: [
+				'Inter', 
+				'sans-serif',
+			]
   		}
   	}, 
   },

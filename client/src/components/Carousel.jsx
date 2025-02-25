@@ -43,9 +43,9 @@ const Carousel = () => {
     }, [rerender, xTranslation, duration, width]);
 
   return (
-<div className="w-ful py-0 overflow-hidden"> {/* Removed fixed height */}
+<div className="w-ful py-0overflow-hidden"> {/* Removed fixed height */}
   <motion.div
-    className="flex gap-4 will-change-transform absolute left-0"
+    className="flex pb-8 gap-4 will-change-transform absolute left-0"
     style={{ 
       x: xTranslation,
     }}

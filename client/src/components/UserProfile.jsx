@@ -126,7 +126,7 @@ const UserProfile = () => {
           {/* Profile Picture Section */}
           <input className='hidden' type="file" accept='image/*' name="image" id="image" ref={imageRef} onChange={handleImageUpload} />
           <div className="flex flex-col items-center justify-center space-y-5 sm:flex-row sm:space-y-0">
-            <img onClick={() => imageRef.current.click()} className="object-cover w-40 cursor-pointer h-40 p-1 rounded-full ring-2 ring-indigo-300"
+            <img onClick={() => imageRef.current.click()} className="object-cover w-32 cursor-pointer h-32 p-1 rounded-full ring-2 ring-indigo-300"
               src={imageUrl || currentUser?.profilePicture} />
           </div>
 
@@ -152,7 +152,7 @@ const UserProfile = () => {
             </div>
 
             <div className="flex mt-6">
-              <button onClick={handleSubmit} className="text-white bg-indigo-700 hover:bg-indigo-800 font-medium rounded-lg text-sm px-5 py-2.5">Submit</button>
+              <button onClick={handleSubmit} className="text-white bg-primary-blue hover:bg-hover-blue font-medium rounded-lg text-sm px-5 py-2.5 transition duration-300">Submit</button>
             </div>
           </div>
         </div>
