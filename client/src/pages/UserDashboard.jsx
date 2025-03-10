@@ -5,6 +5,7 @@ import UserProfile from '../components/UserProfile';
 import { useDispatch, useSelector } from 'react-redux';
 import Avatar from '../components/ui/Avatar';
 import Button from '../components/ui/Button';
+import EventForm from './EventForm';
 
 
 
@@ -41,6 +42,7 @@ const UserDashboard = () => {
         </div>
 
         {tab === "profile" && <UserProfile />}
+        {tab === "event" && <EventForm />}
       </div>
     </div>
   )

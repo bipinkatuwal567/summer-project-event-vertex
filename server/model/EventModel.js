@@ -33,7 +33,7 @@ const eventSchema = mongoose.Schema(
       type: String,
       default: "",
     },
-    isPublished: {
+    approved: {
       type: Boolean,
       default: false,
     },
