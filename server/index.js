@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import authRoutes from "./routes/AuthRoutes.js"
 import userRoutes from "./routes/UserRoutes.js"
+import eventRoutes from "./routes/EventRoutes.js"
 import connectDB from "./db/database.js";
 import cors from "cors"
 import cookieParser from "cookie-parser";
@@ -29,3 +30,4 @@ connectDB()
 // Routes
 app.use("/api/user", userRoutes)
 app.use("/api/auth", authRoutes)
+app.use("/api/event", eventRoutes)
