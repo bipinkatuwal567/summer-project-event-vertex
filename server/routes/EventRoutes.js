@@ -1,12 +1,12 @@
 import express from "express"
 import {verifyOrganizer, verifyToken} from "../utils/AuthMiddleware.js";
-import { CreateEvent, GetEvents } from "../controller/EventController.js";
+import { CreateEvent, GetEventById, GetEvents } from "../controller/EventController.js";
 
 const router = express.Router();
 
 router.post("/", verifyToken, verifyOrganizer, CreateEvent) // Only organizer can create events
 router.get("/", GetEvents)
-router.get("/")
+router.get("/:id", GetEventById)
 router.put("/")
 router.delete("/")
 router.post("/")

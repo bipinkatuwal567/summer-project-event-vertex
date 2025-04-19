@@ -62,7 +62,7 @@ const EventList = () => {
                 {event.description}
               </p>
               <Link
-                to={`/event/${event._id}`}
+                to={`/events/${event._id}`}
                 className="text-blue-600 hover:underline text-sm font-medium"
               >
                 View Details →
