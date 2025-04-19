@@ -74,19 +74,20 @@ export const CreateEvent = async (req, res, next) => {
 
 export const GetEvents = async (req, res) => {
     try {
+        const userRole = req.user?.role || 'attendee';
         let events;
-    
+
         if (userRole === 'admin') {
-          // Admin gets all events (approved + pending)
-          events = await Event.find().sort({ createdAt: -1 });
+            // Admin gets all events (approved + pending)
+            events = await Event.find().sort({ createdAt: -1 });
         } else {
-          // Public users and organizers only see approved events
-          events = await Event.find({ status: 'approved' }).sort({ createdAt: -1 });
+            // Public users and organizers only see approved events
+            events = await Event.find({ approved: true }).sort({ createdAt: -1 });
         }
-    
+
         res.status(200).json({ success: true, data: events });
-      } catch (error) {
+    } catch (error) {
         console.error('Error fetching events:', error);
         res.status(500).json({ success: false, message: 'Server error' });
-      }
+    }
 }

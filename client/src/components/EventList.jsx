@@ -5,13 +5,18 @@ const EventList = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  console.log(events);
+  
+
   const fetchEvents = async () => {
     try {
       const res = await fetch("/api/event");
       const data = await res.json();
 
+      console.log(data);
+      
       if (data.success) {
-        setEvents(data.events);
+        setEvents(data.data);
       } else {
         console.error("Failed to fetch events:", data.message);
       }
