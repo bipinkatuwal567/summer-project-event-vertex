@@ -42,9 +42,16 @@ export const CreateEvent = async (req, res, next) => {
     }
 
     try {
-        const eventStatus = getStatusFromDate(req.body.date);
+        const { title, description, date, location, category, tickets, banner } = req.body;
+
+        const eventStatus = getStatusFromDate(date);
         const newEvent = await Event({
-            ...req.body, 
+            title, 
+            description, 
+            location, 
+            category, 
+            tickets, 
+            banner, 
             organizerId: req.user.id, 
             status: eventStatus, // Auto-set based on date
         })
