@@ -41,8 +41,10 @@ const UserDashboard = () => {
           <Avatar />
         </div>
 
-        {tab === "profile" && <UserProfile />}
-        {tab === "event" && <EventForm />}
+       <div className='px-6'>
+       {tab === "profile" && <UserProfile />}
+       {tab === "event" && <EventForm />}
+       </div>
       </div>
     </div>
   )
