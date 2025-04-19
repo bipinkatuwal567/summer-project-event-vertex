@@ -19,10 +19,22 @@ const validateEventInput = (req) => {
     return null;
 }
 
+// Helper function to determine event status based on current date
+const getStatusFromDate = (eventDate) => {
+    const now = new Date();
+    const event = new Date(eventDate);
+
+    if (event.toDateString() === now.toDateString()) {
+        return "Ongoing";
+    } else if (event > now) {
+        return "Upcoming";
+    } else {
+        return "Completed";
+    }
+};
+
+
 export const CreateEvent = async (req, res, next) => {
-    console.log(req.user);
-    console.log(req.body);
-    
     const errors = validateEventInput(req);
 
     if(errors){
@@ -30,9 +42,11 @@ export const CreateEvent = async (req, res, next) => {
     }
 
     try {
+        const eventStatus = getStatusFromDate(req.body.date);
         const newEvent = await Event({
             ...req.body, 
-            organizerId: req.user.id
+            organizerId: req.user.id, 
+            status: eventStatus, // Auto-set based on date
         })
 
         await newEvent.save();

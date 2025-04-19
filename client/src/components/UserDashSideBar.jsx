@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { signOutSuccess } from "../redux/user/userSlice";
-import { Home, LogOut, Settings } from "lucide-react";
+import { CalendarPlus2, Home, LogOut, Settings } from "lucide-react";
 import Logo from "../assets/logo2.png";
 import { Link, useLocation } from "react-router";
 
@@ -83,6 +83,25 @@ const UserDashSideBar = () => {
               Dashboard
             </li>
           </Link>
+
+          {currentUser.role === "organizer" ? (
+            <Link to={"/user-dashboard?tab=event"}>
+              <li
+                className={`${
+                  tab === "dashboard"
+                    ? "bg-primary-blue text-white"
+                    : "bg-white text-gray-500"
+                } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+              >
+                {" "}
+                <span>
+                  {" "}
+                  <CalendarPlus2 className="w-5 h-5 mr-2" />
+                </span>{" "}
+                Create an event
+              </li>
+            </Link>
+          ) : null}
 
           <Link to={"/user-dashboard?tab=profile"}>
             <li
