@@ -71,3 +71,22 @@ export const CreateEvent = async (req, res, next) => {
         sendResponse(res, 500, "Failed to create event. Please try again later")
     }
 }
+
+export const GetEvents = async (req, res) => {
+    try {
+        let events;
+    
+        if (userRole === 'admin') {
+          // Admin gets all events (approved + pending)
+          events = await Event.find().sort({ createdAt: -1 });
+        } else {
+          // Public users and organizers only see approved events
+          events = await Event.find({ status: 'approved' }).sort({ createdAt: -1 });
+        }
+    
+        res.status(200).json({ success: true, data: events });
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+      }
+}

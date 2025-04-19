@@ -11,7 +11,7 @@ const Header = () => {
 
 
     return (
-        <nav className='w-full px-8 backdrop-blur-sm md:px-16 py-3 border-b border-slate-300 flex justify-between items-center fixed'>
+        <nav className='w-full px-8 backdrop-blur-sm md:px-16 py-3  z-50 flex justify-between items-center fixed'>
             <Link to={"/"}>
                 <img src={Logo} className='w-8' alt="Logo" />
             </Link>
