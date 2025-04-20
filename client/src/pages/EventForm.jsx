@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
-const EventForm = ({ userToken }) => {
+const EventForm = () => {
   const cloudName = import.meta.env.VITE_CLOUDINARY_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_PRESET;
 

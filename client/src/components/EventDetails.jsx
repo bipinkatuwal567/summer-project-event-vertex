@@ -9,12 +9,41 @@ import {
   Users,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
+import toast, { Toaster } from "react-hot-toast";
 
 const EventDetails = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
   const [error, setError] = useState("");
+  const [ticketType, setTicketType] = useState("");
+  const [quantity, setQuantity] = useState(1);
   const navigate = useNavigate();
+
+  const handleRegister = async () => {
+    try {
+      const res = await fetch("/api/bookings/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          eventId: event._id,
+          ticketType,
+          quantity,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Successfully registered!");
+      } else {
+        toast.error(data.message || "Something went wrong");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error registering for event");
+    }
+  };
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -43,14 +72,13 @@ const EventDetails = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <div className="max-w-5xl w-full mx-auto px-4 md:px-8 py-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-sm text-gray-700 hover:text-black bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md shadow-sm transition"
-        >
-          ← Back
-        </button>
-      </div>
+      <Toaster position="bottom-right" />
+      <button
+        onClick={() => navigate(-1)}
+        className="text-sm text-white backdrop-blur-sm px-4 py-2 rounded-md shadow-sm transition absolute z-50"
+      >
+        ← Back
+      </button>
 
       {/* Banner */}
       <div className="relative w-full h-[55vh] md:h-[65vh] overflow-hidden rounded-b-3xl shadow-xl">
@@ -110,22 +138,56 @@ const EventDetails = () => {
             event.tickets.map((ticket, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-lg"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-100 px-4 py-3 rounded-lg"
               >
-                <div className="flex gap-3 items-center">
+                <div className="flex items-center gap-3">
                   <Ticket className="text-yellow-600" />
                   <span className="text-base font-medium">
                     {ticket.type} –{" "}
-                    {ticket.type === "Free"
+                    {ticket.price === 0
                       ? "Free"
                       : `Rs. ${ticket.price.toFixed(2)}`}
                   </span>
                 </div>
-                <span className="text-sm text-gray-600">
-                  {ticket.availableSeats > 0
-                    ? `${ticket.availableSeats} available`
-                    : "Sold Out"}
-                </span>
+
+                <div className="flex flex-wrap gap-4 items-center">
+                  <span className="text-sm text-gray-600">
+                    {ticket.availableSeats > 0
+                      ? `${ticket.availableSeats} available`
+                      : "Sold Out"}
+                  </span>
+
+                  {ticket.availableSeats > 0 && (
+                    <>
+                      <input
+                        type="radio"
+                        name="ticketType"
+                        value={ticket.type}
+                        checked={ticketType === ticket.type}
+                        onChange={() => {
+                          setTicketType(ticket.type);
+                          setQuantity(1); // reset quantity to 1 on new selection
+                        }}
+                      />
+                      {ticketType === ticket.type && (
+                        <input
+                          type="number"
+                          min={1}
+                          max={ticket.availableSeats}
+                          value={quantity}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            if (val >= 1 && val <= ticket.availableSeats) {
+                              setQuantity(val);
+                            }
+                          }}
+                          className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
+                          placeholder="Qty"
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             ))
           ) : (
@@ -143,13 +205,18 @@ const EventDetails = () => {
           </p>
         </section>
 
-        {/* Book Button */}
+        {/* Register Button */}
         <div className="flex justify-center pt-4">
           <button
             className="bg-black hover:bg-gray-900 text-white text-lg font-medium px-6 py-3 rounded-xl shadow-md transition-transform hover:scale-105 duration-200"
-            disabled
+            onClick={handleRegister}
+            disabled={
+              event.status === "Completed" || event.status === "Canceled"
+            }
           >
-            Book Tickets (Coming Soon)
+            {event.status === "Completed" || event.status === "Canceled"
+              ? "Event Closed"
+              : "Book Tickets"}
           </button>
         </div>
       </div>
