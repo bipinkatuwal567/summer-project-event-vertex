@@ -33,16 +33,6 @@ export const verifyOrganizer = (req, res, next) => {
   next();
 }
 
-// Admin middleware (ensures only admins can access certain routes)
-export const verifyAdmin = (req, res, next) => {
-  if(req.user.role !== "admin"){
-    return res.status(403).json({
-      message: "Access denied!, admin only"
-    })
-  }
-
-  next();
-}
 
 // Attendee middleware (ensures only attendee can register for events)
 
