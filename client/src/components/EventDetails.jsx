@@ -26,7 +26,8 @@ const EventDetails = () => {
   
 
   const handleRegister = async () => {
-   if(currentUser !== "Attendee"){
+    
+   if(currentUser.role !== "attendee"){
     toast.error("Only attendees can register for events.")
     return;
    }else{

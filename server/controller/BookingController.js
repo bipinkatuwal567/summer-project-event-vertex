@@ -83,19 +83,19 @@ export const registerForEvent = async (req, res) => {
         .json({ message: `Only ${ticket.availableSeats} seats available.` });
     }
 
-    // Prevent duplicate only for PAID tickets
-    if (ticket.price > 0) {
-      const alreadyBooked = await Booking.findOne({
-        userId,
-        eventId,
-        ticketType,
-      });
-      if (alreadyBooked) {
-        return res
-          .status(400)
-          .json({ message: "You have already booked this ticket type." });
-      }
-    }
+    // // Prevent duplicate only for PAID tickets
+    // if (ticket.price > 0) {
+    //   const alreadyBooked = await Booking.findOne({
+    //     userId,
+    //     eventId,
+    //     ticketType,
+    //   });
+    //   if (alreadyBooked) {
+    //     return res
+    //       .status(400)
+    //       .json({ message: "You have already booked this ticket type." });
+    //   }
+    // }
 
     const totalPrice = ticket.price * quantity;
     let paymentDetails=null
