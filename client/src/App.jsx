@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Header from "./components/Header";
 import { BrowserRouter, Route, Routes } from "react-router";
 import Home from "./pages/Home.jsx";
 import Signup from "./pages/Signup.jsx";
@@ -9,6 +8,9 @@ import Signin from "./pages/Signin.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import UserDashboard from "./pages/UserDashboard.jsx";
 import EventDetails from "./components/EventDetails.jsx";
+import Success from "./components/Success.jsx";
+import Failure from "./components/Failure.jsx";
+import PaymentComponent from "./components/PaymentForm.jsx";
 
 function App() {
   return (
@@ -23,6 +25,10 @@ function App() {
           <Route path="/sign-up" element={<Signup />} />
           <Route path="/sign-in" element={<Signin />} />
         </Route>
+
+        <Route path="/payment" element={<PaymentComponent />} />
+        <Route path="/payment-success" element={<Success />} />
+        <Route path="/payment-failure" element={<Failure />} />
 
         {/* Private route for authenticated users */}
         <Route element={<PrivateRoute />}>

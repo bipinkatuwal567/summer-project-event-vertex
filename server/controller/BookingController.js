@@ -50,7 +50,7 @@ export const registerForEvent = async (req, res) => {
         const { eventId, ticketType, quantity } = req.body;
 
         if (!eventId || !ticketType || !quantity) {
-            return res.status(400).json({ message: 'All fields are required.' });
+            return res.status(400).json({ message: 'Please select any available ticket' });
         }
 
         await autoCancelUnpaidBookings(); // Clean up before new registration
