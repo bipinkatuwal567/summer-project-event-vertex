@@ -1,45 +1,58 @@
 import mongoose from "mongoose";
 
-const bookingSchema = mongoose.Schema(
-    {
-      eventId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Event",
-        required: true,
-      },
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-      },
-      ticketType: {
-        type: String,
-        enum: ["VIP", "General", "Free"],
-        required: true,
-      },
-      quantity: {
-        type: Number,
-        default: 1,
-      },
-      paymentStatus: {
-        type: String,
-        enum: ["Paid", "Pending", "Failed"],
-        default: "Pending",
-      },
-      paymentDetails: {
-        method: String, // e.g., "eSewa"
-        transactionId: String,
-        paidAt: Date,
-      },
-      status: {
-        type: String,
-        enum: ["Confirmed", "Canceled", "Expired"],
-        default: "Confirmed",
-      },
+const bookingSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  eventId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Event",
+    required: true,
+  },
+  ticketType: {
+    type: String,
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1,
+  },
+  ticketPrice: {
+    type: Number,
+    required: true,
+  },
+  totalPrice: {
+    type: Number,
+    required: true,
+  },
+  paymentDetails:{
+    transaction_code:{
+      type:String,
+      required:false
     },
-    { timestamps: true }
-  );
-  
+    status:{
+      type:String,
+      required:false
+    },
+    total_amount:{
+      type:String,
+      required:false
+    },
+    transaction_uuid:{
+      type:String,
+      required:false
+    },
+    product_code:{
+      type:String,
+      required:false
+    },
+  },
+}, {
+  timestamps: true,
+});
 
 bookingSchema.index({ userId: 1, eventId: 1 });
 

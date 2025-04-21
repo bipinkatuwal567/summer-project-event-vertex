@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import CryptoJS from "crypto-js";
+
 import {
   CalendarDays,
   MapPin,
@@ -15,11 +17,64 @@ const EventDetails = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
   const [error, setError] = useState("");
-  const [ticketType, setTicketType] = useState("");
+  const [ticketType, setTicketType] = useState({ type: "", price: 0 });
   const [quantity, setQuantity] = useState(1);
   const navigate = useNavigate();
 
   const handleRegister = async () => {
+    if (ticketType.type !== "Free") {
+      localStorage.setItem('ticketinfo',JSON.stringify({
+        eventId: event._id,
+        ticketType,
+        quantity,
+      }),)
+      try {
+        const uuid = new Date().getTime().toString().slice(-6);
+        const jsonData = {
+          amount: ticketType.price.toFixed(2).toString(),
+          failure_url: `${import.meta.env.VITE_URL}/esewa/purchase-fail`,
+          product_delivery_charge: "0",
+          product_service_charge: "0",
+          product_code: "EPAYTEST",
+          signature: "",
+          signed_field_names: "total_amount,transaction_uuid,product_code",
+
+          success_url: `${import.meta.env.VITE_URL}/esewa/purchase-success`,
+          tax_amount: "0",
+          total_amount: ticketType.price.toFixed(2).toString(),
+          transaction_uuid: uuid,
+        };
+        let url = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
+
+        const message =
+          "total_amount=" +
+          jsonData.total_amount +
+          ",transaction_uuid=" +
+          jsonData.transaction_uuid +
+          ",product_code=" +
+          jsonData.product_code;
+        const signature = createSignature(message);
+        jsonData.signature = signature;
+
+        const form = document.createElement("form");
+        for (const key in jsonData) {
+          const field = document.createElement("input");
+          field.setAttribute("type", "hidden");
+          field.setAttribute("name", key);
+          field.setAttribute("value", jsonData[key]);
+          form.appendChild(field);
+        }
+
+        form.setAttribute("method", "post");
+        form.setAttribute("action", url);
+        document.body.appendChild(form);
+        return form.submit();
+      } catch (error) {
+        console.log(error)
+        toast.error("Something Unexpected Happen! Please Try Again later");
+      } 
+    }
+    
     try {
       const res = await fetch("/api/bookings/register", {
         method: "POST",
@@ -28,7 +83,7 @@ const EventDetails = () => {
         },
         body: JSON.stringify({
           eventId: event._id,
-          ticketType,
+          ticketType:ticketType.type,
           quantity,
         }),
       });
@@ -44,6 +99,14 @@ const EventDetails = () => {
       toast.error("Error registering for event");
     }
   };
+
+
+  function createSignature(message) {
+    const hash = CryptoJS.HmacSHA256(message,"8gBm/:&EnhH.1/q");
+    const hashInBase64 = CryptoJS.enc.Base64.stringify(hash);
+    return hashInBase64;
+  }
+  
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -163,13 +226,16 @@ const EventDetails = () => {
                         type="radio"
                         name="ticketType"
                         value={ticket.type}
-                        checked={ticketType === ticket.type}
+                        checked={ticketType.type === ticket.type}
                         onChange={() => {
-                          setTicketType(ticket.type);
+                          setTicketType({
+                            type: ticket.type,
+                            price: ticket.price,
+                          });
                           setQuantity(1); // reset quantity to 1 on new selection
                         }}
                       />
-                      {ticketType === ticket.type && (
+                      {ticketType.type === ticket.type && (
                         <input
                           type="number"
                           min={1}

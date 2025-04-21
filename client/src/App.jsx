@@ -11,6 +11,8 @@ import EventDetails from "./components/EventDetails.jsx";
 import Success from "./components/Success.jsx";
 import Failure from "./components/Failure.jsx";
 import PaymentComponent from "./components/PaymentForm.jsx";
+import PurchaseSuccess from "./pages/Esewa/PurchaseSuccess.jsx";
+import PurchaseFail from "./pages/Esewa/PurchaseFail.jsx";
 
 function App() {
   return (
@@ -27,8 +29,8 @@ function App() {
         </Route>
 
         <Route path="/payment" element={<PaymentComponent />} />
-        <Route path="/payment-success" element={<Success />} />
-        <Route path="/payment-failure" element={<Failure />} />
+        <Route path="/esewa/purchase-success" element={<PurchaseSuccess />} />
+        <Route path="/esewa/purchase-failure" element={<PurchaseFail />} />
 
         {/* Private route for authenticated users */}
         <Route element={<PrivateRoute />}>
