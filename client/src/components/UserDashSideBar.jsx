@@ -67,40 +67,42 @@ const UserDashSideBar = () => {
         </div>
 
         <div className="flex font-inter flex-col gap-1 mt-4">
-          <Link to={"/user-dashboard?tab=dashboard"}>
-            <li
-              className={`${
-                tab === "dashboard"
-                  ? "bg-primary-blue text-white"
-                  : "bg-white text-gray-500"
-              } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
-            >
-              {" "}
-              <span>
-                {" "}
-                <Home className="w-5 h-5 mr-2" />
-              </span>{" "}
-              Dashboard
-            </li>
-          </Link>
-
           {currentUser.role === "organizer" ? (
-            <Link to={"/user-dashboard?tab=event"}>
-              <li
-                className={`${
-                  tab === "dashboard"
-                    ? "bg-primary-blue text-white"
-                    : "bg-white text-gray-500"
-                } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
-              >
-                {" "}
-                <span>
+            <>
+              <Link to={"/user-dashboard?tab=event"}>
+                <li
+                  className={`${
+                    tab === "dashboard"
+                      ? "bg-primary-blue text-white"
+                      : "bg-white text-gray-500"
+                  } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+                >
                   {" "}
-                  <CalendarPlus2 className="w-5 h-5 mr-2" />
-                </span>{" "}
-                Create an event
-              </li>
-            </Link>
+                  <span>
+                    {" "}
+                    <CalendarPlus2 className="w-5 h-5 mr-2" />
+                  </span>{" "}
+                  Create an event
+                </li>
+              </Link>
+
+              <Link to={"/user-dashboard?tab=dashboard"}>
+                <li
+                  className={`${
+                    tab === "dashboard"
+                      ? "bg-primary-blue text-white"
+                      : "bg-white text-gray-500"
+                  } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+                >
+                  {" "}
+                  <span>
+                    {" "}
+                    <Home className="w-5 h-5 mr-2" />
+                  </span>{" "}
+                  Dashboard
+                </li>
+              </Link>
+            </>
           ) : null}
 
           <Link to={"/user-dashboard?tab=profile"}>

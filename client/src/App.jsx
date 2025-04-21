@@ -30,7 +30,7 @@ function App() {
 
         <Route path="/payment" element={<PaymentComponent />} />
         <Route path="/esewa/purchase-success" element={<PurchaseSuccess />} />
-        <Route path="/esewa/purchase-failure" element={<PurchaseFail />} />
+        <Route path="/esewa/purchase-fail" element={<PurchaseFail />} />
 
         {/* Private route for authenticated users */}
         <Route element={<PrivateRoute />}>

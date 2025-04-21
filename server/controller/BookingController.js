@@ -103,8 +103,6 @@ export const registerForEvent = async (req, res) => {
     if (esewaData) {
       console.log("Data", esewaData);
       const decryptedEsewaData = decodeBase64(esewaData);
-      console.log("Data", esewaData);
-      const decryptedEsewaData = decodeBase64(esewaData);
       console.log(decryptedEsewaData);
       paymentDetails = {
         transaction_code: decryptedEsewaData.transaction_code,
