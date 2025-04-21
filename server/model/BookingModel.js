@@ -28,6 +28,10 @@ const bookingSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  cancellationReason: {
+    type: String,
+    default: ""
+  },
   paymentDetails:{
     transaction_code:{
       type:String,

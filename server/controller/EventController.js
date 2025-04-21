@@ -1,5 +1,6 @@
 import { validationResult } from "express-validator";
 import Event from "../model/EventModel.js";
+import Booking from "../model/BookingModel.js";
 
 // Helper function for response structure
 const sendResponse = (res, status, message, data = null) => {
@@ -44,8 +45,15 @@ export const CreateEvent = async (req, res, next) => {
   try {
     const { title, description, date, location, category, tickets, banner } = req.body;
 
+    const now = new Date();
+    const event = new Date(date);
+
     if (!title || !description || !date || !location || !category || !tickets || !banner) {
       return sendResponse(res, 400, "Missing required fields");
+    }
+
+    if (event.getTime() < now.getTime()){
+      return sendResponse(res, 400, "This date is invalid")
     }
 
     const eventStatus = getStatusFromDate(date);
@@ -78,10 +86,10 @@ export const GetEvents = async (req, res) => {
 
     if (userRole === 'organizer') {
       // Organizers see only their own events
-      events = await Event.find({ organizerId: req.user.id }).sort({ createdAt: -1 });
+      events = await Event.find({ organizerId: req.user.id, isDeleted: false }).sort({ createdAt: -1 });
     } else {
       // Attendees see only upcoming or ongoing events
-      events = await Event.find({ status: { $in: ["Upcoming", "Ongoing"] } }).sort({ createdAt: -1 });
+      events = await Event.find({ status: { $in: ["Upcoming", "Ongoing"] }, isDeleted: false }).sort({ createdAt: -1 });
     }
 
     sendResponse(res, 200, "Events fetched successfully", events);
@@ -148,24 +156,70 @@ export const UpdateEvent = async (req, res) => {
 };
 
 // Delete Event (only organizer can delete)
+// DELETE /api/events/:id
 export const DeleteEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find event by ID
+    const event = await Event.findById(id);
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    // Only the organizer who created the event can delete it
+    if (event.organizerId.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this event",
+      });
+    }
+
+    await event.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: "Event deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete event error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while deleting event",
+    });
+  }
+};
+
+// Soft Delete Event
+export const SoftDeleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
     const event = await Event.findById(id);
 
-    if (!event) {
-      return sendResponse(res, 404, "Event not found");
-    }
+    if (!event) return sendResponse(res, 404, "Event not found");
 
     if (event.organizerId.toString() !== req.user.id) {
-      return sendResponse(res, 403, "You are not authorized to delete this event.");
+      return sendResponse(res, 403, "Not authorized to delete this event");
     }
 
-    await event.remove();
-    sendResponse(res, 200, "Event deleted successfully");
+    event.isDeleted = true;
+    event.status = "Canceled"; // optional status update
+    await event.save();
+
+    // Cancel all bookings related to this event
+    await Booking.updateMany(
+      { eventId: id },
+      { status: "Cancelled", cancellationReason: "Event was deleted by organizer" }
+    );
+
+    sendResponse(res, 200, "Event cancelled and bookings updated");
   } catch (error) {
     console.error(error);
-    sendResponse(res, 500, "Failed to delete event");
+    sendResponse(res, 500, "Something went wrong while cancelling event");
   }
 };
 
@@ -173,7 +227,7 @@ export const DeleteEvent = async (req, res) => {
 // For a dedicated Organizer Dashboard, it’s cleaner and RESTful to have a separate route like: GET /api/events/organizer
 export const GetEventsByOrganizer = async (req, res) => {
   try {
-    const events = await Event.find({ organizerId: req.user.id }).sort({ createdAt: -1 });
+    const events = await Event.find({ organizerId: req.user.id, isDeleted: false }).sort({ createdAt: -1 });
     sendResponse(res, 200, "Organizer events fetched successfully", events);
   } catch (error) {
     console.error("Error fetching organizer events:", error);

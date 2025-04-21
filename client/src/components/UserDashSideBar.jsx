@@ -69,23 +69,6 @@ const UserDashSideBar = () => {
         <div className="flex font-inter flex-col gap-1 mt-4">
           {currentUser.role === "organizer" ? (
             <>
-              <Link to={"/user-dashboard?tab=event"}>
-                <li
-                  className={`${
-                    tab === "event"
-                      ? "bg-primary-blue text-white"
-                      : "bg-white text-gray-500"
-                  } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
-                >
-                  {" "}
-                  <span>
-                    {" "}
-                    <CalendarPlus2 className="w-5 h-5 mr-2" />
-                  </span>{" "}
-                  Create an event
-                </li>
-              </Link>
-
               <Link to={"/user-dashboard?tab=dashboard"}>
                 <li
                   className={`${
@@ -102,28 +85,44 @@ const UserDashSideBar = () => {
                   Dashboard
                 </li>
               </Link>
+
+              <Link to={"/user-dashboard?tab=event"}>
+                <li
+                  className={`${
+                    tab === "event"
+                      ? "bg-primary-blue text-white"
+                      : "bg-white text-gray-500"
+                  } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+                >
+                  {" "}
+                  <span>
+                    {" "}
+                    <CalendarPlus2 className="w-5 h-5 mr-2" />
+                  </span>{" "}
+                  Create an event
+                </li>
+              </Link>
             </>
           ) : null}
 
           {currentUser.role === "attendee" ? (
             <Link to={"/user-dashboard?tab=my"}>
-            <li
-              className={`${
-                tab === "my"
-                  ? "bg-primary-blue text-white"
-                  : "bg-white text-gray-500"
-              } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
-            >
-              {" "}
-              <span>
+              <li
+                className={`${
+                  tab === "my"
+                    ? "bg-primary-blue text-white"
+                    : "bg-white text-gray-500"
+                } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+              >
                 {" "}
-                <Home className="w-5 h-5 mr-2" />
-              </span>{" "}
-              My Registrations
-            </li>
-          </Link>
-          ) : null
-          }
+                <span>
+                  {" "}
+                  <Home className="w-5 h-5 mr-2" />
+                </span>{" "}
+                My Registrations
+              </li>
+            </Link>
+          ) : null}
 
           <Link to={"/user-dashboard?tab=profile"}>
             <li

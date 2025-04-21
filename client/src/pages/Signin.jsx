@@ -84,6 +84,7 @@ const Signin = () => {
     return (
         <main className="min-h-screen w-full flex mx-auto justify-center items-center text-center">
             <Toaster position='bottom-right' />
+            
             {/* Image Section */}
             <div className='hidden relative lg:flex w-full h-screen max-h-screen max-w-screen p-2'>
                 <img className='w-full h-full object-cover rounded-3xl' src={AuthHeroImg} alt="Auth Background" />
