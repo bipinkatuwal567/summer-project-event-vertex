@@ -5,13 +5,11 @@ const MyRegistrations = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  console.log(bookings);
+
   const fetchBookings = async () => {
     try {
-      const res = await fetch("/api/bookings/my", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const res = await fetch("/api/bookings/my");
 
       const data = await res.json();
       if (res.ok) {
@@ -38,7 +36,9 @@ const MyRegistrations = () => {
       <h2 className="text-3xl font-bold mb-4">My Event Registrations</h2>
 
       {bookings.length === 0 ? (
-        <p className="text-gray-500">You haven’t registered for any events yet.</p>
+        <p className="text-gray-500">
+          You haven’t registered for any events yet.
+        </p>
       ) : (
         <div className="grid gap-6">
           {bookings.map((booking) => (
@@ -71,19 +71,17 @@ const MyRegistrations = () => {
                   </p>
                   <p>
                     <strong>Payment:</strong>{" "}
-                    <span
-                      className={`font-medium ${
-                        booking.paymentDetails?.status === "Completed"
-                          ? "text-green-600"
-                          : "text-yellow-500"
-                      }`}
-                    >
-                      {booking.paymentDetails?.status || "Pending"}
+                    <span className="text-sm text-green-600">
+                      {booking.paymentDetails?.status === "Confirmed"
+                        ? "Free - Confirmed"
+                        : booking.paymentDetails?.status || "PENDING"}
                     </span>
                   </p>
                   <p>
                     <strong>Event Status:</strong>{" "}
-                    <span className="capitalize">{booking.eventId?.status}</span>
+                    <span className="capitalize">
+                      {booking.eventId?.status}
+                    </span>
                   </p>
                 </div>
               </div>

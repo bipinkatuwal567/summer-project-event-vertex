@@ -84,24 +84,9 @@ export const registerForEvent = async (req, res) => {
         .json({ message: `Only ${ticket.availableSeats} seats available.` });
     }
 
-    // // Prevent duplicate only for PAID tickets
-    // if (ticket.price > 0) {
-    //   const alreadyBooked = await Booking.findOne({
-    //     userId,
-    //     eventId,
-    //     ticketType,
-    //   });
-    //   if (alreadyBooked) {
-    //     return res
-    //       .status(400)
-    //       .json({ message: "You have already booked this ticket type." });
-    //   }
-    // }
-
     const totalPrice = ticket.price * quantity;
     let paymentDetails=null
     if (esewaData) {
-      console.log("Data", esewaData);
       const decryptedEsewaData = decodeBase64(esewaData);
       console.log(decryptedEsewaData);
       paymentDetails = {
@@ -110,6 +95,11 @@ export const registerForEvent = async (req, res) => {
         total_amount: decryptedEsewaData.total_amount,
         transaction_uuid: decryptedEsewaData.transaction_uuid,
         product_code: decryptedEsewaData.product_code,
+      };
+    }else if (totalPrice === 0) {
+      // ✅ Free ticket case — mark as confirmed
+      paymentDetails = {
+        status: "Confirmed",
       };
     }
 
@@ -142,7 +132,9 @@ export const registerForEvent = async (req, res) => {
 
 export const getMyBookings = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
+    console.log(userId);
+    
 
     const bookings = await Booking.find({ userId })
       .populate({
