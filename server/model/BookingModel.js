@@ -28,10 +28,27 @@ const bookingSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  paymentStatus: {
-    type: String,
-    enum: ["Pending", "Paid"],
-    default: "Pending",
+  paymentDetails:{
+    transaction_code:{
+      type:String,
+      required:false
+    },
+    status:{
+      type:String,
+      required:false
+    },
+    total_amount:{
+      type:String,
+      required:false
+    },
+    transaction_uuid:{
+      type:String,
+      required:false
+    },
+    product_code:{
+      type:String,
+      required:false
+    },
   },
 }, {
   timestamps: true,
