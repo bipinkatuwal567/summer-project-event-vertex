@@ -168,3 +168,16 @@ export const DeleteEvent = async (req, res) => {
     sendResponse(res, 500, "Failed to delete event");
   }
 };
+
+
+// For a dedicated Organizer Dashboard, it’s cleaner and RESTful to have a separate route like: GET /api/events/organizer
+export const GetEventsByOrganizer = async (req, res) => {
+  try {
+    const events = await Event.find({ organizerId: req.user.id }).sort({ createdAt: -1 });
+    sendResponse(res, 200, "Organizer events fetched successfully", events);
+  } catch (error) {
+    console.error("Error fetching organizer events:", error);
+    sendResponse(res, 500, "Failed to fetch organizer events");
+  }
+};
+
