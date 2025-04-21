@@ -26,11 +26,13 @@ const EventDetails = () => {
   
 
   const handleRegister = async () => {
-   if(currentUser !== "Attendee"){
+   if(currentUser.role !== "attendee"){
     toast.error("Only attendees can register for events.")
     return;
    }else{
     if (ticketType.type !== "Free") {
+      const totalPrice = quantity * ticketType.price
+      console.log(totalPrice)
       localStorage.setItem('ticketinfo',JSON.stringify({
         eventId: event._id,
         ticketType,
@@ -39,7 +41,7 @@ const EventDetails = () => {
       try {
         const uuid = new Date().getTime().toString().slice(-6);
         const jsonData = {
-          amount: ticketType.price.toFixed(2).toString(),
+          amount: totalPrice.toFixed(2).toString(),
           failure_url: `${import.meta.env.VITE_URL}/esewa/purchase-fail`,
           product_delivery_charge: "0",
           product_service_charge: "0",
@@ -49,7 +51,7 @@ const EventDetails = () => {
 
           success_url: `${import.meta.env.VITE_URL}/esewa/purchase-success`,
           tax_amount: "0",
-          total_amount: ticketType.price.toFixed(2).toString(),
+          total_amount: totalPrice.toFixed(2).toString(),
           transaction_uuid: uuid,
         };
         let url = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
@@ -82,12 +84,12 @@ const EventDetails = () => {
         toast.error("Something Unexpected Happen! Please Try Again later");
       } 
     }
-    
-    try {
-      const res = await fetch("/api/bookings/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    else {
+      try {
+        const res = await fetch("/api/bookings/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
         },
         body: JSON.stringify({
           eventId: event._id,
@@ -107,6 +109,7 @@ const EventDetails = () => {
       toast.error("Error registering for event");
     }
    }
+  }
   };
 
 
