@@ -28,13 +28,12 @@ function App() {
           <Route path="/sign-in" element={<Signin />} />
         </Route>
 
-        <Route path="/payment" element={<PaymentComponent />} />
-        <Route path="/esewa/purchase-success" element={<PurchaseSuccess />} />
-        <Route path="/esewa/purchase-fail" element={<PurchaseFail />} />
-
         {/* Private route for authenticated users */}
         <Route element={<PrivateRoute />}>
           <Route path="/user-dashboard" element={<UserDashboard />} />
+          <Route path="/payment" element={<PaymentComponent />} />
+          <Route path="/esewa/purchase-success" element={<PurchaseSuccess />} />
+          <Route path="/esewa/purchase-fail" element={<PurchaseFail />} />
         </Route>
         <Route path="/events/:id" element={<EventDetails />} />
       </Routes>

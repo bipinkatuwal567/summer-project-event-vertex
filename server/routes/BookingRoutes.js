@@ -5,5 +5,6 @@ import { registerForEvent } from '../controller/BookingController.js';
 const router = express.Router();
 
 router.post('/register',verifyToken, registerForEvent);
+router.get("/my", verifyToken, getMyBookings)
 
 export default router;

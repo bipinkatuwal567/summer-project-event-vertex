@@ -138,3 +138,22 @@ export const registerForEvent = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
+
+export const getMyBookings = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const bookings = await Booking.find({ userId })
+      .populate({
+        path: "eventId",
+        select: "title date location banner category status",
+      })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Error fetching user's bookings", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};

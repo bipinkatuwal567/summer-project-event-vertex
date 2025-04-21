@@ -72,7 +72,7 @@ const UserDashSideBar = () => {
               <Link to={"/user-dashboard?tab=event"}>
                 <li
                   className={`${
-                    tab === "dashboard"
+                    tab === "event"
                       ? "bg-primary-blue text-white"
                       : "bg-white text-gray-500"
                   } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
@@ -104,6 +104,26 @@ const UserDashSideBar = () => {
               </Link>
             </>
           ) : null}
+
+          {currentUser.role === "attendee" ? (
+            <Link to={"/user-dashboard?tab=my"}>
+            <li
+              className={`${
+                tab === "my"
+                  ? "bg-primary-blue text-white"
+                  : "bg-white text-gray-500"
+              } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+            >
+              {" "}
+              <span>
+                {" "}
+                <Home className="w-5 h-5 mr-2" />
+              </span>{" "}
+              My Registrations
+            </li>
+          </Link>
+          ) : null
+          }
 
           <Link to={"/user-dashboard?tab=profile"}>
             <li

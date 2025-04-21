@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router'
+import { useLocation } from 'react-router'
 import UserDashSideBar from '../components/UserDashSideBar';
 import UserProfile from '../components/UserProfile';
 import { useDispatch, useSelector } from 'react-redux';
 import Avatar from '../components/ui/Avatar';
-import Button from '../components/ui/Button';
 import EventForm from './EventForm';
+import MyRegistrations from '../components/MyRegistrations';
 
 
 
@@ -44,6 +44,7 @@ const UserDashboard = () => {
        <div className='px-6'>
        {tab === "profile" && <UserProfile />}
        {tab === "event" && <EventForm />}
+       {tab === "my" && <MyRegistrations />}
        </div>
       </div>
     </div>
