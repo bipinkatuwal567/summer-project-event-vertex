@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import toast, { Toaster } from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -20,8 +21,15 @@ const EventDetails = () => {
   const [ticketType, setTicketType] = useState({ type: "", price: 0 });
   const [quantity, setQuantity] = useState(1);
   const navigate = useNavigate();
+  const { currentUser } = useSelector(state => state.user)
+  console.log(currentUser);
+  
 
   const handleRegister = async () => {
+   if(currentUser !== "Attendee"){
+    toast.error("Only attendees can register for events.")
+    return;
+   }else{
     if (ticketType.type !== "Free") {
       localStorage.setItem('ticketinfo',JSON.stringify({
         eventId: event._id,
@@ -98,6 +106,7 @@ const EventDetails = () => {
       console.error(err);
       toast.error("Error registering for event");
     }
+   }
   };
 
 

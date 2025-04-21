@@ -43,6 +43,9 @@ export const registerForEvent = async (req, res) => {
     const userId = req.user.id;
     const { role } = req.user;
 
+    console.log(role);
+    
+
     console.log(role)
     if (role !== "attendee") {
       return res
@@ -98,6 +101,8 @@ export const registerForEvent = async (req, res) => {
     const totalPrice = ticket.price * quantity;
     let paymentDetails=null
     if (esewaData) {
+      console.log("Data", esewaData);
+      const decryptedEsewaData = decodeBase64(esewaData);
       console.log("Data", esewaData);
       const decryptedEsewaData = decodeBase64(esewaData);
       console.log(decryptedEsewaData);
