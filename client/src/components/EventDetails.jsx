@@ -114,7 +114,7 @@ const EventDetails = () => {
         const res = await fetch(`/api/event/${id}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Error fetching event");
-        setEvent(data);
+        setEvent(data.data);
       } catch (err) {
         setError(err.message);
       }
