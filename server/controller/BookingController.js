@@ -1,7 +1,6 @@
 import Booking from "../model/BookingModel.js";
 import Event from "../model/EventModel.js";
 
-
 // Date status checker
 export const getEventStatus = (eventDate) => {
     const now = new Date();
@@ -50,7 +49,7 @@ export const registerForEvent = async (req, res) => {
         const { eventId, ticketType, quantity } = req.body;
 
         if (!eventId || !ticketType || !quantity) {
-            return res.status(400).json({ message: 'Please select any available ticket' });
+            return res.status(400).json({ message: 'All fields are required.' });
         }
 
         await autoCancelUnpaidBookings(); // Clean up before new registration
@@ -68,16 +67,14 @@ export const registerForEvent = async (req, res) => {
             return res.status(400).json({ message: 'Invalid ticket type.' });
         }
 
-        if (ticket.availableSeats < quantity) {
+        if (ticket.price === 0 && ticket.availableSeats < quantity) {
             return res.status(400).json({ message: `Only ${ticket.availableSeats} seats available.` });
         }
 
         // Prevent duplicate only for PAID tickets
-        if (ticket.price > 0) {
-            const alreadyBooked = await Booking.findOne({ userId, eventId, ticketType });
-            if (alreadyBooked) {
-                return res.status(400).json({ message: 'You have already booked this ticket type.' });
-            }
+        const alreadyBooked = await Booking.findOne({ userId, eventId, ticketType });
+        if (alreadyBooked && ticket.price > 0) {
+            return res.status(400).json({ message: 'You have already booked this ticket type.' });
         }
 
         const totalPrice = ticket.price * quantity;
@@ -94,9 +91,11 @@ export const registerForEvent = async (req, res) => {
 
         await newBooking.save();
 
-        // ✅ Always reduce availableSeats and set Paid if free
-        ticket.availableSeats -= quantity;
-        await event.save();
+        // Reduce availableSeats ONLY if Paid (i.e. Free ticket)
+        if (ticket.price === 0) {
+            ticket.availableSeats -= quantity;
+            await event.save();
+        }
 
         res.status(201).json({
             message: 'Successfully registered for the event',
@@ -108,4 +107,3 @@ export const registerForEvent = async (req, res) => {
         res.status(500).json({ message: 'Server Error', error: error.message });
     }
 };
-
