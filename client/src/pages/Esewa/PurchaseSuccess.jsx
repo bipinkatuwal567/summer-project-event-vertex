@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 const PurchaseSuccess = () => {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
+  const [isError, setError] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
   console.log("payment")
   const esewaData = searchParams.get("data");
   console.log(esewaData)
@@ -33,13 +35,21 @@ const PurchaseSuccess = () => {
         if (res.ok) {
           toast.success("Successfully registered!");
           setLoading(false)
+          setError(false)
+          setIsSuccess(true)
         } else {
           console.log(data.message)
-          toast.error(data.message || "Something went wrong");
+          setError(true)
+          setIsSuccess(false)
+          setLoading(false)
+          // toast.error(data.message || "Something went wrong");
         }
       } catch (err) {
         console.error(err);
-        toast.error("Error registering for event");
+        setError(true)
+        setLoading(false)
+        setIsSuccess(false)
+        // toast.error("Error registering for event");
       }
     }
 
