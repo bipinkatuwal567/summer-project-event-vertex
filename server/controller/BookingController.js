@@ -39,14 +39,12 @@ const autoCancelUnpaidBookings = async () => {
 
 // 🎟️ Event Registration
 export const registerForEvent = async (req, res) => {
+  console.log("Start", req.body);
+  
   try {
     const userId = req.user.id;
     const { role } = req.user;
 
-    console.log(role);
-    
-
-    console.log(role)
     if (role !== "attendee") {
       return res
         .status(403)
@@ -61,6 +59,7 @@ export const registerForEvent = async (req, res) => {
         .json({ message: "Please select any available ticket" });
     }
 
+    console.log("check unpaid");
     await autoCancelUnpaidBookings(); // Clean up before new registration
 
     const event = await Event.findById(eventId);
@@ -99,10 +98,11 @@ export const registerForEvent = async (req, res) => {
     }else if (totalPrice === 0) {
       // ✅ Free ticket case — mark as confirmed
       paymentDetails = {
-        status: "Confirmed",
+        status: "COMPLETE",
       };
     }
 
+    console.log("new booking");
     const newBooking = new Booking({
       userId,
       eventId,

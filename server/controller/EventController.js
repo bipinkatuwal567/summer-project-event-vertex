@@ -1,6 +1,7 @@
 import { validationResult } from "express-validator";
 import Event from "../model/EventModel.js";
 import Booking from "../model/BookingModel.js";
+import mongoose, { Types } from "mongoose";
 
 // Helper function for response structure
 const sendResponse = (res, status, message, data = null) => {
@@ -52,7 +53,7 @@ export const CreateEvent = async (req, res, next) => {
       return sendResponse(res, 400, "Missing required fields");
     }
 
-    if (event.getTime() < now.getTime()){
+    if (event.getTime() < now.getTime()) {
       return sendResponse(res, 400, "This date is invalid")
     }
 
@@ -238,19 +239,20 @@ export const GetEventsByOrganizer = async (req, res) => {
 export const getBookingsForEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
-    const organizerId = req.user.id;
+
 
     const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     // Check if logged-in user is the organizer of this event
-    if (event.createdBy.toString() !== organizerId) {
-      return res.status(403).json({ message: "Unauthorized access" });
+    if (event.organizerId.toString() !== req.user.id) {
+      return sendResponse(res, 403, "Not authorized to delete this event");
     }
 
-    const bookings = await Booking.find({ event: eventId }).populate("attendee", "username email");
-
-    res.json(bookings);
+    const bookings = await Booking.find({ eventId: eventId })
+    .populate("userId", "username email")
+    .populate('eventId', 'status');
+    res.status(200).json({ success: true, data: bookings });
   } catch (err) {
     console.error("Error fetching bookings:", err);
     res.status(500).json({ message: "Server error" });

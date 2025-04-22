@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import EventEditForm from "./EventEditForm";
 import toast, { Toaster } from "react-hot-toast";
-import BookingsModal from "./BookingsModa";
+import BookingsModal from "./BookingsModal";
+import { Pencil, Trash2, Eye } from "lucide-react";
 
 const OrganizerDashboard = () => {
   const [events, setEvents] = useState([]);
@@ -12,7 +13,9 @@ const OrganizerDashboard = () => {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch("/api/event/organizer");
+      const res = await fetch("/api/event/organizer", {
+        method: "GET"
+      });
       const data = await res.json();
       setEvents(data.data);
     } catch (error) {
@@ -59,35 +62,49 @@ const OrganizerDashboard = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {events.map((event) => (
-            <div
-              key={event._id}
-              className="bg-white rounded-xl shadow p-4 space-y-2"
-            >
-              <img
-                src={event.banner}
-                alt={event.title}
-                className="h-40 w-full object-cover rounded-lg"
-              />
-              <h2 className="text-lg font-semibold">{event.title}</h2>
-              <p className="text-sm text-gray-600">
-                {new Date(event.date).toLocaleDateString()}
-              </p>
-              <p className="text-sm">{event.location}</p>
-              <div className="flex justify-between mt-2">
-                <button
-                  onClick={() => setEditingEvent(event)}
-                  className="text-blue-600 hover:underline"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => setDeletingEventId(event._id)}
-                  className="text-red-600 hover:underline"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+           <div
+           key={event._id}
+           className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col"
+         >
+           <img
+             src={event.banner}
+             alt={event.title}
+             className="h-48 w-full object-cover"
+           />
+           <div className="p-4 flex flex-col justify-between flex-grow">
+             <div className="space-y-1">
+               <h2 className="text-lg font-bold truncate">{event.title}</h2>
+               <p className="text-sm text-gray-500">{new Date(event.date).toLocaleDateString()}</p>
+               <p className="text-sm text-gray-600 truncate">{event.location}</p>
+             </div>
+         
+             <div className="flex justify-between items-center mt-4">
+               <div className="flex gap-2">
+                 <button
+                   onClick={() => setEditingEvent(event)}
+                   className="p-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition"
+                   title="Edit Event"
+                 >
+                   <Pencil size={18} />
+                 </button>
+                 <button
+                   onClick={() => setDeletingEventId(event._id)}
+                   className="p-2 bg-red-100 text-red-700 rounded-full hover:bg-red-200 transition"
+                   title="Delete Event"
+                 >
+                   <Trash2 size={18} />
+                 </button>
+               </div>
+         
+               <button
+                 onClick={() => setSelectedEventId(event._id)}
+                 className="flex items-center gap-1 text-sm px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition"
+               >
+                 <Eye size={16} /> Bookings
+               </button>
+             </div>
+           </div>
+         </div>
           ))}
         </div>
       )}

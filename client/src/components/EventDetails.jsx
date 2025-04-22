@@ -22,7 +22,6 @@ const EventDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const navigate = useNavigate();
   const { currentUser } = useSelector(state => state.user)
-  console.log(currentUser);
   
 
   const handleRegister = async () => {
@@ -33,7 +32,6 @@ const EventDetails = () => {
    }else{
     if (ticketType.type !== "Free") {
       const totalPrice = quantity * ticketType.price
-      console.log(totalPrice)
       localStorage.setItem('ticketinfo',JSON.stringify({
         eventId: event._id,
         ticketType,

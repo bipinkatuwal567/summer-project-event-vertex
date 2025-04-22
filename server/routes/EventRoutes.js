@@ -10,6 +10,6 @@ router.get("/organizer", verifyToken, GetEventsByOrganizer)
 router.get("/:id", GetEventById)
 router.put("/:id", verifyToken, verifyOrganizer, UpdateEvent)
 router.delete("/:id", verifyToken, SoftDeleteEvent)
-router.get("/events/:eventId/bookings", verifyToken, getBookingsForEvent);
+router.get("/:eventId/bookings", verifyToken, verifyOrganizer, getBookingsForEvent);
 
 export default router;
