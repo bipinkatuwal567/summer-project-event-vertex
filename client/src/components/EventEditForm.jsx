@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
 
 const EventEditForm = ({ event, onClose, onUpdate }) => {
+  const cloudName = import.meta.env.VITE_CLOUDINARY_NAME;
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_PRESET;
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -14,6 +18,8 @@ const EventEditForm = ({ event, onClose, onUpdate }) => {
   const [imageFile, setImageFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [uploadedImageURL, setUploadedImageURL] = useState("");
+  console.log(formData);
+  
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
@@ -31,9 +37,9 @@ const EventEditForm = ({ event, onClose, onUpdate }) => {
     setImageFile(file);
 
     // Upload to Cloudinary
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", uploadPreset);
+    const formDataImage = new FormData();
+    formDataImage.append("file", file);
+    formDataImage.append("upload_preset", uploadPreset);
 
     try {
       toast.loading("Uploading image...");
@@ -41,7 +47,7 @@ const EventEditForm = ({ event, onClose, onUpdate }) => {
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
         {
           method: "POST",
-          body: formData,
+          body: formDataImage,
         }
       );
 
@@ -50,6 +56,7 @@ const EventEditForm = ({ event, onClose, onUpdate }) => {
 
       if (data.secure_url) {
         setUploadedImageURL(data.secure_url);
+        setFormData({...formData, banner: data.secure_url})
         toast.success("Image uploaded!");
       } else {
         throw new Error("Upload failed.");
@@ -85,12 +92,10 @@ const EventEditForm = ({ event, onClose, onUpdate }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`/api/events/${event._id}`, {
+      const res = await fetch(`/api/event/${event._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
@@ -99,6 +104,7 @@ const EventEditForm = ({ event, onClose, onUpdate }) => {
       if (res.ok) {
         onUpdate(); // Refresh list
         onClose(); // Close modal
+        toast.success(result.message)
       } else {
         alert(result.message || "Failed to update event.");
       }
@@ -110,6 +116,7 @@ const EventEditForm = ({ event, onClose, onUpdate }) => {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <Toaster position="bottom-right" />
       <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 rounded-lg shadow-xl relative">
         <h2 className="text-xl font-bold mb-4">Edit Event</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
