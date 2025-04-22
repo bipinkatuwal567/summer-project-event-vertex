@@ -4,6 +4,7 @@ import authRoutes from "./routes/AuthRoutes.js"
 import userRoutes from "./routes/UserRoutes.js"
 import eventRoutes from "./routes/EventRoutes.js"
 import bookingRoutes from "./routes/BookingRoutes.js"
+import organizerRoutes from "./routes/OrganizerRoutes.js"
 import connectDB from "./db/database.js";
 import cors from "cors"
 import cookieParser from "cookie-parser";
@@ -32,3 +33,4 @@ app.use("/api/user", userRoutes)
 app.use("/api/auth", authRoutes)
 app.use("/api/event", eventRoutes)
 app.use("/api/bookings", bookingRoutes)
+app.use("/api/organizer", organizerRoutes)
