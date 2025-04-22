@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
 import EventEditForm from "./EventEditForm";
-import toast, { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
+import BookingsModal from "./BookingsModa";
 
 const OrganizerDashboard = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingEvent, setEditingEvent] = useState(null);
   const [deletingEventId, setDeletingEventId] = useState(null);
-  console.log("Events: ", events );
+  const [selectedEventId, setSelectedEventId] = useState(null);
 
   const fetchEvents = async () => {
     try {
       const res = await fetch("/api/event/organizer");
       const data = await res.json();
       setEvents(data.data);
-      
     } catch (error) {
       console.error("Failed to fetch events:", error);
     } finally {
@@ -31,7 +31,7 @@ const OrganizerDashboard = () => {
       if (res.ok) {
         setEvents((prev) => prev.filter((e) => e._id !== deletingEventId));
         setDeletingEventId(null);
-        toast.success("Event deleted successfully")
+        toast.success("Event deleted successfully");
       } else {
         alert("Failed to delete event.");
       }
@@ -45,12 +45,13 @@ const OrganizerDashboard = () => {
     fetchEvents();
   }, []);
 
-  if (loading) return <div className="text-center mt-10">Loading events...</div>;
+  if (loading)
+    return <div className="text-center mt-10">Loading events...</div>;
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-        <Toaster position='bottom-right' />
-        
+      <Toaster position="bottom-right" />
+
       <h1 className="text-2xl font-bold mb-6">My Created Events</h1>
 
       {events.length === 0 ? (
@@ -58,10 +59,19 @@ const OrganizerDashboard = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {events.map((event) => (
-            <div key={event._id} className="bg-white rounded-xl shadow p-4 space-y-2">
-              <img src={event.banner} alt={event.title} className="h-40 w-full object-cover rounded-lg" />
+            <div
+              key={event._id}
+              className="bg-white rounded-xl shadow p-4 space-y-2"
+            >
+              <img
+                src={event.banner}
+                alt={event.title}
+                className="h-40 w-full object-cover rounded-lg"
+              />
               <h2 className="text-lg font-semibold">{event.title}</h2>
-              <p className="text-sm text-gray-600">{new Date(event.date).toLocaleDateString()}</p>
+              <p className="text-sm text-gray-600">
+                {new Date(event.date).toLocaleDateString()}
+              </p>
               <p className="text-sm">{event.location}</p>
               <div className="flex justify-between mt-2">
                 <button
@@ -80,6 +90,13 @@ const OrganizerDashboard = () => {
             </div>
           ))}
         </div>
+      )}
+
+      {selectedEventId && (
+        <BookingsModal
+          eventId={selectedEventId}
+          onClose={() => setSelectedEventId(null)}
+        />
       )}
 
       {/* Edit Modal */}
