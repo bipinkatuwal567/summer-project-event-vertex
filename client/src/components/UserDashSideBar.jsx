@@ -1,14 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { signOutSuccess } from "../redux/user/userSlice";
-import { CalendarPlus2, Home, LogOut, Settings } from "lucide-react";
+import {
+  CalendarPlus2,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+} from "lucide-react";
 import Logo from "../assets/logo2.png";
 import { Link, useLocation } from "react-router";
 
 const UserDashSideBar = () => {
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.user);
-  console.log(currentUser);
   const [tab, setTab] = useState("");
   const location = useLocation();
 
@@ -30,7 +35,6 @@ const UserDashSideBar = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const tabFromUrl = urlParams.get("tab");
-    console.log(tabFromUrl);
 
     if (tabFromUrl) {
       setTab(tabFromUrl);
@@ -80,9 +84,26 @@ const UserDashSideBar = () => {
                   {" "}
                   <span>
                     {" "}
-                    <Home className="w-5 h-5 mr-2" />
+                    <LayoutDashboard className="w-5 h-5 mr-2" />
                   </span>{" "}
                   Dashboard
+                </li>
+              </Link>
+
+              <Link to={"/user-dashboard?tab=myevents"}>
+                <li
+                  className={`${
+                    tab === "myevents"
+                      ? "bg-primary-blue text-white"
+                      : "bg-white text-gray-500"
+                  } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+                >
+                  {" "}
+                  <span>
+                    {" "}
+                    <Home className="w-5 h-5 mr-2" />
+                  </span>{" "}
+                  My Events
                 </li>
               </Link>
 

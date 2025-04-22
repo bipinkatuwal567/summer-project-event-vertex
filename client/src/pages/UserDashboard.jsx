@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Avatar from '../components/ui/Avatar';
 import EventForm from './EventForm';
 import MyRegistrations from '../components/MyRegistrations';
+import OrganizerMyEvents from '../components/OrganizerMyEvents';
 import OrganizerDashboard from '../components/OrganizerDashboard';
 
 
@@ -44,6 +45,7 @@ const UserDashboard = () => {
 
        <div className='px-6'>
        {tab === "dashboard" && <OrganizerDashboard />}
+       {tab === "myevents" && <OrganizerMyEvents />}
        {tab === "profile" && <UserProfile />}
        {tab === "event" && <EventForm />}
        {tab === "my" && <MyRegistrations />}
