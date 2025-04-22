@@ -150,24 +150,3 @@ export const getMyBookings = async (req, res) => {
   }
 };
 
-export const getBookingsForEvent = async (req, res) => {
-  try {
-    const { eventId } = req.params;
-    const organizerId = req.user.id;
-
-    const event = await Event.findById(eventId);
-    if (!event) return res.status(404).json({ message: "Event not found" });
-
-    // Check if logged-in user is the organizer of this event
-    if (event.createdBy.toString() !== organizerId) {
-      return res.status(403).json({ message: "Unauthorized access" });
-    }
-
-    const bookings = await Booking.find({ event: eventId }).populate("attendee", "username email");
-
-    res.json(bookings);
-  } catch (err) {
-    console.error("Error fetching bookings:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-};

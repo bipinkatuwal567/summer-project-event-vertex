@@ -1,6 +1,6 @@
 import express from "express"
-import {verifyOrganizer, verifyToken} from "../utils/AuthMiddleware.js";
-import { CreateEvent, GetEventById, GetEvents, GetEventsByOrganizer, SoftDeleteEvent, UpdateEvent } from "../controller/EventController.js";
+import { verifyOrganizer, verifyToken } from "../utils/AuthMiddleware.js";
+import { CreateEvent, getBookingsForEvent, GetEventById, GetEvents, GetEventsByOrganizer, SoftDeleteEvent, UpdateEvent } from "../controller/EventController.js";
 
 const router = express.Router();
 
@@ -10,6 +10,6 @@ router.get("/organizer", verifyToken, GetEventsByOrganizer)
 router.get("/:id", GetEventById)
 router.put("/:id", verifyToken, verifyOrganizer, UpdateEvent)
 router.delete("/:id", verifyToken, SoftDeleteEvent)
-router.post("/")
+router.get("/events/:eventId/bookings", verifyToken, getBookingsForEvent);
 
 export default router;
