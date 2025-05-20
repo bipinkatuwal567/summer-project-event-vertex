@@ -33,10 +33,10 @@ const Avatar = () => {
             </div>
             <ul
                 tabIndex={0}
-                className="menu dropdown-content bg-gray-100 border border-gray-300 rounded-lg z-[1] mt-4 shadow flex px-2 justify-center items-center">
-                <div className='flex flex-col px-1 gap-2'>
+                className="menu dropdown-content bg-gray-100 border border-gray-300 rounded-lg z-[1] mt-4 shadow flex px-2 justify-center items-center min-w-[200px] w-auto whitespace-nowrap">
+                <div className='flex flex-col px-1 gap-2 w-full'>
                     <p className='font-medium'>Signed in as:</p>
-                    <p className='font-medium cap'>{currentUser.email}</p>
+                    <p className='font-medium truncate max-w-[250px]'>{currentUser.email}</p>
                 </div>
                 <div className='mt-2 w-full border-t-2 pt-1 border-gray-200'>
                     <li className='hover:bg-gray-200 rounded-md'><Link to={"/"} className='p-2 text-gray-600'>Home</Link></li>

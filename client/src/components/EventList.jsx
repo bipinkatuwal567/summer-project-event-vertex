@@ -5,8 +5,6 @@ const EventList = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  console.log(events);
-  
 
   const fetchEvents = async () => {
     try {
@@ -14,7 +12,7 @@ const EventList = () => {
       const data = await res.json();
 
       console.log(data);
-      
+
       if (data.success) {
         setEvents(data.data);
       } else {
@@ -40,7 +38,7 @@ const EventList = () => {
   }
 
   return (
-    <main className="flex flex-col flex-grow w-full mx-auto justify-center overflow-x-hidden mt-10 px-8 py-3">
+    <main className="flex flex-col flex-grow bg-white w-full mx-auto justify-center overflow-x-hidden pt-8 px-8 py-3">
       <h2 className="text-3xl font-bold mb-6 text-center font-marcellus">Upcoming Events</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
         {events.map((event) => (

@@ -40,9 +40,20 @@ const MyRegistrations = () => {
     });
 
     return (
-      <div className="bg-gray-100 p-4 rounded-lg flex flex-col items-center">
-        <QRCodeSVG value={qrValue} size={160} level="M" className="mb-2" />
-        <p className="text-xs text-gray-600">Scan for verification</p>
+      <div className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center">
+        <div className="mb-2 p-2 bg-white rounded-md">
+          <QRCodeSVG 
+            value={qrValue} 
+            size={160} 
+            level="M" 
+            className="mb-2"
+            bgColor="#FFFFFF"
+            fgColor="#000000"
+            includeMargin={true}
+          />
+        </div>
+        <p className="text-xs text-gray-600 font-medium">Scan for verification</p>
+        <p className="text-xs text-gray-500 mt-1">ID: {booking._id.substring(0, 8)}...</p>
       </div>
     );
   };

@@ -21,96 +21,106 @@ const EventDetails = () => {
   const [ticketType, setTicketType] = useState({ type: "", price: 0 });
   const [quantity, setQuantity] = useState(1);
   const navigate = useNavigate();
-  const { currentUser } = useSelector(state => state.user)
+  const { currentUser } = useSelector(state => state.user);
+  const [isRegistering, setIsRegistering] = useState(false);
   
-
-  const handleRegister = async () => {
+  const handleRegistration = async () => {
+    if (!currentUser) {
+      toast.error("Please sign in to register for this event");
+      return;
+    }
     
-   if(currentUser.role !== "attendee"){
-    toast.error("Only attendees can register for events.")
-    return;
-   }else{
-    if (ticketType.type !== "Free") {
-      const totalPrice = quantity * ticketType.price
-      localStorage.setItem('ticketinfo',JSON.stringify({
-        eventId: event._id,
-        ticketType,
-        quantity,
-      }),)
-      try {
-        const uuid = new Date().getTime().toString().slice(-6);
-        const jsonData = {
-          amount: totalPrice.toFixed(2).toString(),
-          failure_url: `${import.meta.env.VITE_URL}/esewa/purchase-fail`,
-          product_delivery_charge: "0",
-          product_service_charge: "0",
-          product_code: "EPAYTEST",
-          signature: "",
-          signed_field_names: "total_amount,transaction_uuid,product_code",
-
-          success_url: `${import.meta.env.VITE_URL}/esewa/purchase-success`,
-          tax_amount: "0",
-          total_amount: totalPrice.toFixed(2).toString(),
-          transaction_uuid: uuid,
-        };
-        let url = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
-
-        const message =
-          "total_amount=" +
-          jsonData.total_amount +
-          ",transaction_uuid=" +
-          jsonData.transaction_uuid +
-          ",product_code=" +
-          jsonData.product_code;
-        const signature = createSignature(message);
-        jsonData.signature = signature;
-
-        const form = document.createElement("form");
-        for (const key in jsonData) {
-          const field = document.createElement("input");
-          field.setAttribute("type", "hidden");
-          field.setAttribute("name", key);
-          field.setAttribute("value", jsonData[key]);
-          form.appendChild(field);
-        }
-
-        form.setAttribute("method", "post");
-        form.setAttribute("action", url);
-        document.body.appendChild(form);
-        return form.submit();
-      } catch (error) {
-        console.log(error)
-        toast.error("Something Unexpected Happen! Please Try Again later");
-      } 
+    if (currentUser.role !== "attendee") {
+      toast.error("Only attendees can register for events.");
+      return;
     }
-    else {
-      try {
-        const res = await fetch("/api/bookings/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+    
+    setIsRegistering(true);
+    
+    try {
+      if (ticketType.type !== "Free") {
+        const totalPrice = quantity * ticketType.price;
+        localStorage.setItem('ticketinfo', JSON.stringify({
           eventId: event._id,
-          ticketType:ticketType.type,
+          ticketType,
           quantity,
-        }),
-      });
+        }));
+        try {
+          const uuid = new Date().getTime().toString().slice(-6);
+          const jsonData = {
+            amount: totalPrice.toFixed(2).toString(),
+            failure_url: `${import.meta.env.VITE_URL}/esewa/purchase-fail`,
+            product_delivery_charge: "0",
+            product_service_charge: "0",
+            product_code: "EPAYTEST",
+            signature: "",
+            signed_field_names: "total_amount,transaction_uuid,product_code",
+            success_url: `${import.meta.env.VITE_URL}/esewa/purchase-success`,
+            tax_amount: "0",
+            total_amount: totalPrice.toFixed(2).toString(),
+            transaction_uuid: uuid,
+          };
+          let url = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
 
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("Successfully registered!");
+          const message =
+            "total_amount=" +
+            jsonData.total_amount +
+            ",transaction_uuid=" +
+            jsonData.transaction_uuid +
+            ",product_code=" +
+            jsonData.product_code;
+          const signature = createSignature(message);
+          jsonData.signature = signature;
+
+          const form = document.createElement("form");
+          for (const key in jsonData) {
+            const field = document.createElement("input");
+            field.setAttribute("type", "hidden");
+            field.setAttribute("name", key);
+            field.setAttribute("value", jsonData[key]);
+            form.appendChild(field);
+          }
+
+          form.setAttribute("method", "post");
+          form.setAttribute("action", url);
+          document.body.appendChild(form);
+          return form.submit();
+        } catch (error) {
+          console.log(error);
+          toast.error("Something Unexpected Happen! Please Try Again later");
+        }
       } else {
-        toast.error(data.message || "Something went wrong");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Error registering for event");
-    }
-   }
-  }
-  };
+        try {
+          const res = await fetch("/api/bookings/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              eventId: event._id,
+              ticketType: ticketType.type,
+              quantity,
+            }),
+          });
 
+          const data = await res.json();
+          if (res.ok) {
+            toast.success("Successfully registered!");
+          } else {
+            toast.error(data.message || "Something went wrong");
+          }
+        } catch (err) {
+          console.error(err);
+          toast.error("Error registering for event");
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Registration failed. Please try again.");
+    } finally {
+      setIsRegistering(false);
+    }
+  };
 
   function createSignature(message) {
     const hash = CryptoJS.HmacSHA256(message,"8gBm/:&EnhH.1/q");
@@ -285,15 +295,23 @@ const EventDetails = () => {
         {/* Register Button */}
         <div className="flex justify-center pt-4">
           <button
-            className="bg-black hover:bg-gray-900 text-white text-lg font-medium px-6 py-3 rounded-xl shadow-md transition-transform hover:scale-105 duration-200"
-            onClick={handleRegister}
-            disabled={
-              event.status === "Completed" || event.status === "Canceled"
-            }
+            onClick={handleRegistration}
+            disabled={isRegistering || event.status === "Completed" || event.status === "Canceled"}
+            className="w-full bg-primary-blue hover:bg-hover-blue text-white py-2 px-4 rounded-lg transition-all disabled:opacity-70"
           >
-            {event.status === "Completed" || event.status === "Canceled"
-              ? "Event Closed"
-              : "Book Tickets"}
+            {isRegistering ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </span>
+            ) : (
+              event.status === "Completed" || event.status === "Canceled"
+                ? "Event Closed"
+                : "Register Now"
+            )}
           </button>
         </div>
       </div>
