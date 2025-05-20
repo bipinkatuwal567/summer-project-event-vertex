@@ -7,6 +7,8 @@ import { LogOut } from 'lucide-react';
 const Avatar = () => {
     const dispatch = useDispatch();
     const { currentUser } = useSelector(state => state.user)
+    console.log(currentUser);
+
 
     const handleSignout = async () => {
         try {
@@ -40,6 +42,13 @@ const Avatar = () => {
                     <li className='hover:bg-gray-200 rounded-md'><Link to={"/"} className='p-2 text-gray-600'>Home</Link></li>
                     <li className='hover:bg-gray-200 rounded-md'><Link to={"/user-dashboard?tab=profile"} className='p-2 text-gray-600'>Manage Account</Link></li>
                     <li className='hover:bg-gray-200 rounded-md' onClick={handleSignout}><a className='p-2 text-gray-600'>Sign out <LogOut className='w-4' /></a></li>
+                    {currentUser.role === "organizer" ? (
+                        <>
+                            <li className='hover:bg-gray-200 rounded-md sm:hidden'><Link to={"/user-dashboard?tab=dashboard"} className='p-2 text-gray-600'>Dashboard</Link></li>
+                            <li className='hover:bg-gray-200 rounded-md sm:hidden'><Link to={"/user-dashboard?tab=myevents"} className='p-2 text-gray-600'>My Events</Link></li>
+                            <li className='hover:bg-gray-200 rounded-md sm:hidden'><Link to={"/user-dashboard?tab=event"} className='p-2 text-gray-600'>Create an Event</Link></li>
+                        </>
+                    ) : null}
                 </div>
             </ul>
         </div>
