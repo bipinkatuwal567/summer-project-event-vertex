@@ -1,20 +1,19 @@
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { QRCodeSVG } from "qrcode.react";
-import QRCode from "qrcode"; // Add this import for QRCode.toDataURL
-import html2canvas from "html2canvas"; // Add this import for html2canvas
+import QRCode from "qrcode";
+import html2canvas from "html2canvas";
+import { Calendar, MapPin, Tag, Download, Ticket, Clock, CreditCard, User } from "lucide-react";
 
 const MyRegistrations = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  console.log(bookings);
-
   const fetchBookings = async () => {
     try {
       const res = await fetch("/api/bookings/my");
-
       const data = await res.json();
+      
       if (res.ok) {
         setBookings(data);
       } else {
@@ -59,10 +58,11 @@ const MyRegistrations = () => {
   };
 
   const downloadAsImage = async (booking) => {
-    console.log(booking);
     if (!booking) return;
 
     try {
+      toast.loading("Generating ticket...");
+      
       // Create a container for the ticket
       const ticketContainer = document.createElement("div");
       document.body.appendChild(ticketContainer); // Add to DOM temporarily for html2canvas
@@ -216,14 +216,17 @@ const MyRegistrations = () => {
       // Create download link
       const downloadLink = document.createElement("a");
       downloadLink.href = imageURL;
-      downloadLink.download = `event-vertex-ticket-${booking._id}.png`; // Fixed: using booking._id instead of bookingData._id
+      downloadLink.download = `event-vertex-ticket-${booking._id}.png`;
       downloadLink.click();
       
       // Clean up - remove the temporary element
       document.body.removeChild(ticketContainer);
+      toast.dismiss();
+      toast.success("Ticket downloaded successfully");
       
     } catch (error) {
       console.error("Error generating ticket image:", error);
+      toast.dismiss();
       toast.error("Failed to download ticket. Please try again.");
     }
   };
@@ -232,110 +235,148 @@ const MyRegistrations = () => {
     fetchBookings();
   }, []);
 
-  if (loading) return <div className="text-center py-6">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-500">Loading your registrations...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h2 className="text-3xl font-bold mb-4">My Event Registrations</h2>
+    <div className="max-w-4xl mx-auto">
+      <Toaster position="bottom-right" />
+      
+      {/* Header */}
+      <div className="bg-white rounded-2xl shadow-sm px-6 pb-6 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="bg-indigo-100 p-3 rounded-xl">
+            <Ticket size={24} className="text-indigo-600" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800 font-marcellus">My Event Registrations</h2>
+            <p className="text-gray-500 mt-1">View and manage your event tickets</p>
+          </div>
+        </div>
+      </div>
 
       {bookings.length === 0 ? (
-        <p className="text-gray-500">
-          You haven't registered for any events yet.
-        </p>
+        <div className="bg-white mt-6 rounded-2xl shadow-sm p-10 text-center">
+          <div className="flex flex-col items-center justify-center">
+            <div className="bg-indigo-50 p-4 rounded-full mb-4">
+              <Calendar size={32} className="text-indigo-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">No Registrations Found</h2>
+            <p className="text-gray-500 max-w-md mx-auto mb-6">
+              You haven't registered for any events yet. Browse events to find something you'd like to attend.
+            </p>
+          </div>
+        </div>
       ) : (
-        <div className="grid gap-6">
+        <div className="space-y-8">
           {bookings.map((booking) => (
-            <div key={booking._id} className="flex flex-col md:flex-row gap-6 mb-6">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-3 pb-1 border-b border-gray-200">
-                  Ticket Details
-                </h3>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-start">
-                    <span className="font-medium w-32">Event ID:</span>
-                    <span className="text-gray-600">{booking.eventId._id}</span>
+            <div key={booking._id} className="bg-white mt-6 rounded-2xl shadow-sm overflow-hidden">
+              {/* Event Header */}
+              <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 border-b border-gray-100">
+                <h3 className="text-xl font-bold text-gray-800">{booking.eventId.title}</h3>
+                <div className="flex flex-wrap gap-3 mt-2">
+                  <div className="flex items-center text-gray-600 text-sm">
+                    <Calendar size={14} className="mr-1 text-indigo-600" />
+                    {booking.eventId.date}
                   </div>
-                  <div className="flex justify-start">
-                    <span className="font-medium w-32">Event Title:</span>
-                    <span className="text-gray-600">
-                      {booking.eventId.title}
-                    </span>
+                  <div className="flex items-center text-gray-600 text-sm">
+                    <MapPin size={14} className="mr-1 text-indigo-600" />
+                    {booking.eventId.location}
                   </div>
-                  <div className="flex justify-start">
-                    <span className="font-medium w-32">Event Location:</span>
-                    <span className="text-gray-600">
-                      {booking.eventId.location}
-                    </span>
-                  </div>
-                  <div className="flex justify-start">
-                    <span className="font-medium w-32">Event Date:</span>
-                    <span className="text-gray-600">
-                      {booking.eventId.date}
-                    </span>
-                  </div>
-                  <div className="flex justify-start">
-                    <span className="font-medium w-32">Event Status:</span>
-                    <span className="text-gray-600">
-                      {booking.eventId.status}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-start">
-                    <span className="font-medium w-32">Ticket Type:</span>
-                    <span className="text-gray-600">{booking.ticketType}</span>
-                  </div>
-
-                  <div className="flex justify-start">
-                    <span className="font-medium w-32">Quantity:</span>
-                    <span className="text-gray-600">{booking.quantity}</span>
-                  </div>
-
-                  <div className="flex justify-start">
-                    <span className="font-medium w-32">Ticket Price:</span>
-                    <span className="text-gray-600">
-                      Rs. {booking.ticketPrice}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-start">
-                    <span className="font-medium w-32">Total Price:</span>
-                    <span className="text-gray-600">
-                      Rs. {booking.totalPrice}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-start">
-                    <span className="font-medium w-32">Transaction ID:</span>
-                    <span className="text-gray-600 truncate max-w-[180px]">
-                      {booking.paymentDetails?.transaction_code || "N/A"}
-                    </span>
+                  <div className="flex items-center text-gray-600 text-sm">
+                    <Tag size={14} className="mr-1 text-indigo-600" />
+                    {booking.eventId.category}
                   </div>
                 </div>
               </div>
-
-              <div className="flex-none flex flex-col items-center justify-center">
-                <TicketQRCode booking={booking} />
-                <button
-                  onClick={() => downloadAsImage(booking)}
-                  className="px-4 py-2 mt-4 bg-black text-white font-semibold rounded-lg shadow-sm hover:bg-gray-800 transition-all flex items-center justify-center text-sm"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                    />
-                  </svg>
-                  Download Ticket
-                </button>
+              
+              {/* Ticket Content */}
+              <div className="p-6">
+                <div className="flex flex-col md:flex-row gap-8">
+                  {/* Ticket Details */}
+                  <div className="flex-1 space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-100 flex items-center">
+                      <Ticket size={18} className="mr-2 text-indigo-600" />
+                      Ticket Details
+                    </h4>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-500 mb-1">Ticket Type</p>
+                        <p className="font-medium">{booking.ticketType}</p>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-500 mb-1">Quantity</p>
+                        <p className="font-medium">{booking.quantity}</p>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-500 mb-1">Price per Ticket</p>
+                        <p className="font-medium">Rs. {booking.ticketPrice}</p>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-500 mb-1">Total Price</p>
+                        <p className="font-medium">Rs. {booking.totalPrice}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3 mt-2">
+                      <div className="flex items-start">
+                        <CreditCard size={16} className="mr-2 text-indigo-600 mt-0.5" />
+                        <div>
+                          <p className="text-xs text-gray-500">Transaction ID</p>
+                          <p className="font-medium text-sm truncate max-w-[250px]">
+                            {booking.paymentDetails?.transaction_code || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <Clock size={16} className="mr-2 text-indigo-600 mt-0.5" />
+                        <div>
+                          <p className="text-xs text-gray-500">Booking Date</p>
+                          <p className="font-medium text-sm">
+                            {new Date(booking.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <User size={16} className="mr-2 text-indigo-600 mt-0.5" />
+                        <div>
+                          <p className="text-xs text-gray-500">Event Status</p>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            booking.eventId.status === "canceled" 
+                              ? "bg-red-100 text-red-700" 
+                              : "bg-green-100 text-green-700"
+                          }`}>
+                            {booking.eventId.status}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* QR Code */}
+                  <div className="flex flex-col items-center">
+                    <TicketQRCode booking={booking} />
+                    <button
+                      onClick={() => downloadAsImage(booking)}
+                      className="px-4 py-2 mt-4 bg-primary-blue text-white font-semibold rounded-lg shadow-sm hover:bg-hover-blue transition-all flex items-center justify-center text-sm"
+                    >
+                      <Download size={16} className="mr-2" />
+                      Download Ticket
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           ))}

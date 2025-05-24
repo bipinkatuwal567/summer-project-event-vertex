@@ -3,6 +3,8 @@ import MainLayout from "./components/MainLayout.jsx";
 import AuthLayout from "./components/AuthLayout.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import OrganizerRoute from "./components/OrganizerRoute.jsx";
+import AccountCreatedSuccess from './components/AccountCreatedSuccess';
+import GoogleSignupSuccess from './components/GoogleSignupSuccess';
 
 import Home from "./pages/Home.jsx";
 import Signup from "./pages/Signup.jsx";
@@ -15,6 +17,9 @@ import PurchaseFail from "./pages/Esewa/PurchaseFail.jsx";
 import OrganizerMyEvents from "./components/OrganizerMyEvents.jsx";
 
 function App() {
+  // Log when App component renders
+  console.log("App component rendering, routes being set up");
+  
   return (
     <BrowserRouter>
       <Routes>
@@ -42,6 +47,10 @@ function App() {
             <Route path="/organizer-dashboard" element={<OrganizerMyEvents />} />
           </Route>
         </Route>
+        
+        {/* Success Pages - These should NOT be inside PrivateRoute */}
+        <Route path="/account-created-success" element={<AccountCreatedSuccess />} />
+        <Route path="/google-signup-success" element={<GoogleSignupSuccess />} />
       </Routes>
     </BrowserRouter>
   );

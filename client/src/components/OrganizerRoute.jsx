@@ -1,9 +1,10 @@
 import { Navigate, Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const OrganizerRoute = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { currentUser } = useSelector(state => state.user);
 
-  if (!user || user.role !== "organizer") {
+  if (!currentUser || currentUser.role !== "organizer") {
     return <Navigate to="/user-dashboard" replace />;
   }
 

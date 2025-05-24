@@ -38,9 +38,25 @@ export const getRecommendations = async (req, res) => {
       .limit(50);
 
     // 4. Score and rank events based on user preferences
-    const scoredEvents = rankEventsByRelevance(upcomingEvents, userPreferences);
+    let scoredEvents = rankEventsByRelevance(upcomingEvents, userPreferences);
+    
+    // 5. Handle new users with no preferences (cold start)
+    if (scoredEvents.length === 0 && upcomingEvents.length > 0) {
+      console.log("New user with no preferences - providing popular events");
+      
+      // For new users, return popular events or events happening soon
+      scoredEvents = upcomingEvents
+        .map(event => ({
+          ...event._doc,
+          relevanceScore: 1 // Give all events a base score
+        }))
+        .sort((a, b) => {
+          // Sort by date (events happening sooner first)
+          return new Date(a.date) - new Date(b.date);
+        });
+    }
 
-    // 5. Return top recommendations
+    // 6. Return top recommendations
     return res.status(200).json({
       success: true,
       message: "Recommendations retrieved successfully",
@@ -139,3 +155,4 @@ const rankEventsByRelevance = (events, preferences) => {
     .filter((event) => event.relevanceScore > 0) // Only return relevant events
     .sort((a, b) => b.relevanceScore - a.relevanceScore); // Sort by relevance
 };
+

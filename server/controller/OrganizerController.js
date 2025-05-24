@@ -4,115 +4,208 @@ import Booking from "../model/BookingModel.js";
 export const getOrganizerStats = async (req, res) => {
   try {
     const organizerId = req.user.id;
+    console.log("Fetching stats for organizer:", organizerId);
 
-    // 1. Fetch organizer's events
-    const events = await Event.find({ organizerId, isDeleted: false });
+    // Base query for events by this organizer
+    const baseEventQuery = { organizerId: organizerId, isDeleted: false };
+
+    // Get total events
+    const totalEvents = await Event.countDocuments(baseEventQuery);
+    console.log("Total events:", totalEvents);
+
+    // Get events with their bookings
+    const events = await Event.find(baseEventQuery).lean();
     const eventIds = events.map((event) => event._id);
+    console.log("Found event IDs:", eventIds);
 
-    // 2. Get bookings for those events
-    const bookings = await Booking.find({ eventId: { $in: eventIds } });
+    // Get total registrations
+    const totalRegistrations = await Booking.countDocuments({
+      eventId: { $in: eventIds },
+    });
+    console.log("Total registrations:", totalRegistrations);
 
-    // 3. Summary
-    const totalEvents = events.length;
-    const totalRegistrations = bookings.reduce((acc, b) => acc + b.quantity, 0);
-    const totalRevenue = bookings.reduce((acc, b) => acc + b.totalPrice, 0);
+    // Calculate total revenue - Fix: Check for status inside paymentDetails
+    const bookings = await Booking.find({
+      eventId: { $in: eventIds },
+      $or: [
+        { "paymentDetails.status": { $in: ["paid", "PAID", "COMPLETE", "COMPLETED"] } },
+        { paymentStatus: { $in: ["paid", "PAID", "COMPLETE", "COMPLETED"] } }
+      ]
+    }).lean();
+    
+    console.log("Found paid bookings:", bookings.length);
+    
+    // Fix: Calculate total revenue from totalPrice field
+    const totalRevenue = bookings.reduce((sum, booking) => {
+      return sum + (booking.totalPrice || 0);
+    }, 0);
+    
+    console.log("Total revenue:", totalRevenue);
 
-    // 4. Event-wise stats
-    const eventStats = events.map((event) => {
-      const ticketStats = event.tickets.map((ticket) => {
-        const sold = bookings
-          .filter(
-            (b) =>
-              b.eventId.toString() === event._id.toString() &&
-              b.ticketType === ticket.type
-          )
-          .reduce((acc, b) => acc + b.quantity, 0);
+    // Get sales trend (bookings over time)
+    let salesTrend = [];
+    try {
+      // Add console log to debug
+      console.log("Fetching sales trend for events:", eventIds);
+      
+      salesTrend = await Booking.aggregate([
+        { $match: { eventId: { $in: eventIds } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
+      
+      console.log("Sales trend results:", salesTrend);
+      
+      // If no sales data, provide empty placeholder data
+      if (salesTrend.length === 0) {
+        // Create some placeholder data for the last 7 days
+        const today = new Date();
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(today.getDate() - i);
+          const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD
+          salesTrend.push({
+            _id: dateString,
+            count: 0
+          });
+        }
+        console.log("Created placeholder sales trend data:", salesTrend);
+      }
+    } catch (err) {
+      console.error("Error getting sales trend:", err);
+    }
 
-        const revenue = sold * ticket.price;
+    // Get bookings per event
+    let bookingsPerEvent = [];
+    try {
+      bookingsPerEvent = await Booking.aggregate([
+        { $match: { eventId: { $in: eventIds } } },
+        {
+          $group: {
+            _id: "$eventId",
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $lookup: {
+            from: "events",
+            localField: "_id",
+            foreignField: "_id",
+            as: "event",
+          },
+        },
+        { $unwind: "$event" },
+        {
+          $project: {
+            eventName: "$event.title",
+            count: 1,
+          },
+        },
+        { $sort: { count: -1 } },
+      ]);
+    } catch (err) {
+      console.error("Error getting bookings per event:", err);
+    }
+
+    // Get paid vs unpaid registrations - Fix: Check status in paymentDetails
+    const paidStatusData = await Booking.aggregate([
+      { $match: { eventId: { $in: eventIds } } },
+      {
+        $project: {
+          status: { 
+            $cond: { 
+              if: { $ifNull: ["$paymentDetails.status", false] }, 
+              then: "$paymentDetails.status", 
+              else: "$paymentStatus" 
+            } 
+          }
+        }
+      },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Get ticket type distribution
+    const ticketTypeDistribution = await Booking.aggregate([
+      { $match: { eventId: { $in: eventIds } } },
+      {
+        $group: {
+          _id: "$ticketType",
+          value: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Get detailed stats for each event - Fix: Correct the available calculation
+    const eventStats = await Promise.all(
+      events.map(async (event) => {
+        const ticketStats = await Promise.all(
+          event.tickets.map(async (ticket) => {
+            // Count sold tickets for this type
+            const sold = await Booking.countDocuments({
+              eventId: event._id,
+              ticketType: ticket.type,
+            });
+
+            // Get paid bookings for revenue calculation - Fix: Check status in paymentDetails
+            const paidBookings = await Booking.find({
+              eventId: event._id,
+              ticketType: ticket.type,
+              $or: [
+                { "paymentDetails.status": { $in: ["paid", "PAID", "COMPLETE", "COMPLETED"] } },
+                { paymentStatus: { $in: ["paid", "PAID", "COMPLETE", "COMPLETED"] } }
+              ]
+            }).lean();
+            
+            // Calculate revenue from paid bookings using totalPrice
+            const revenue = paidBookings.reduce((sum, booking) => {
+              return sum + (booking.totalPrice || 0);
+            }, 0);
+            
+            // Fix: Use the correct field for available seats
+            const available = ticket.availableSeats || ticket.quantity || 0;
+
+            return {
+              type: ticket.type,
+              sold: sold || 0,
+              available: Math.max(0, available - sold), // Ensure it's not negative
+              revenue: revenue || 0,
+            };
+          })
+        );
 
         return {
-          type: ticket.type,
-          sold,
-          available: ticket.availableSeats - sold,
-          revenue,
+          eventId: event._id,
+          title: event.title,
+          date: event.date,
+          ticketStats,
         };
-      });
-
-      return {
-        eventId: event._id,
-        title: event.title,
-        date: event.date,
-        ticketStats,
-      };
-    });
-
-    // 5. Paid vs Unpaid
-    const paidStatusData = [
-      {
-        _id: "Paid",
-        count: bookings.filter((b) => b.paymentDetails?.status === "COMPLETE")
-          .length,
-      },
-      {
-        _id: "Unpaid",
-        count: bookings.filter(
-          (b) => !b.paymentDetails || b.paymentDetails.status !== "COMPLETE"
-        ).length,
-      },
-    ];
-
-    // 6. Ticket Type Distribution
-    const ticketTypeMap = {};
-    bookings.forEach((b) => {
-      if (!ticketTypeMap[b.ticketType]) ticketTypeMap[b.ticketType] = 0;
-      ticketTypeMap[b.ticketType] += b.quantity;
-    });
-    const ticketTypeDistribution = Object.entries(ticketTypeMap).map(
-      ([type, value]) => ({ _id: type, value })
+      })
     );
 
-    const salesTrendMap = {};
-
-    bookings.forEach((b) => {
-      const dateKey = new Date(b.createdAt).toISOString().split("T")[0];
-      if (!salesTrendMap[dateKey]) salesTrendMap[dateKey] = 0;
-      salesTrendMap[dateKey] += b.quantity;
-    });
-
-    const salesTrend = Object.entries(salesTrendMap).map(([date, count]) => ({
-      _id: date,
-      count,
-    }));
-
-    const bookingsPerEventMap = {};
-
-    bookings.forEach((b) => {
-      const event = events.find(
-        (e) => e._id.toString() === b.eventId.toString()
-      );
-      const name = event?.title || "Unknown Event";
-
-      if (!bookingsPerEventMap[name]) bookingsPerEventMap[name] = 0;
-      bookingsPerEventMap[name] += b.quantity;
-    });
-
-    const bookingsPerEvent = Object.entries(bookingsPerEventMap).map(
-      ([eventName, count]) => ({ eventName, count })
-    );
-
-    res.json({
+    // Send the response with all stats
+    res.status(200).json({
       totalEvents,
       totalRegistrations,
       totalRevenue,
-      eventStats,
-      paidStatusData,
-      ticketTypeDistribution,
       salesTrend,
       bookingsPerEvent,
+      paidStatusData,
+      ticketTypeDistribution,
+      eventStats,
     });
-  } catch (err) {
-    console.error("Error getting organizer stats", err);
-    res.status(500).json({ message: "Server error" });
+  } catch (error) {
+    console.error("Error getting organizer stats:", error);
+    res.status(500).json({ message: "Failed to get organizer statistics" });
   }
 };
 
@@ -124,10 +217,13 @@ export const getEventTicketStats = async (req, res) => {
     const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
-    // Get all confirmed bookings for this event
+    // Get all confirmed bookings for this event - Fix: Check status in paymentDetails
     const bookings = await Booking.find({
       eventId,
-      "paymentDetails.status": "COMPLETE",
+      $or: [
+        { "paymentDetails.status": { $in: ["paid", "PAID", "COMPLETE", "COMPLETED"] } },
+        { paymentStatus: { $in: ["paid", "PAID", "COMPLETE", "COMPLETED"] } }
+      ]
     });
 
     const ticketStats = {};
@@ -135,11 +231,11 @@ export const getEventTicketStats = async (req, res) => {
     for (const ticket of event.tickets) {
       const sold = bookings
         .filter((b) => b.ticketType === ticket.type)
-        .reduce((sum, b) => sum + b.quantity, 0);
+        .reduce((sum, b) => sum + (b.quantity || 1), 0);
 
       ticketStats[ticket.type] = {
         sold,
-        available: ticket.availableSeats - sold,
+        available: (ticket.availableSeats || ticket.quantity || 0) - sold,
       };
     }
 

@@ -59,11 +59,10 @@ const UserDashSideBar = () => {
               {currentUser.username}
             </p>
             <p
-              className={`text-xs self-start py-1 rounded-full px-2 text-white ${
-                currentUser.role === "attendee"
+              className={`text-xs self-start py-1 rounded-full px-2 text-white ${currentUser.role === "attendee"
                   ? "bg-blue-500"
                   : "bg-orange-500"
-              }`}
+                }`}
             >
               {currentUser.role === "attendee" ? "Attendee" : "Organizer"}
             </p>
@@ -75,11 +74,10 @@ const UserDashSideBar = () => {
             <>
               <Link to={"/user-dashboard?tab=dashboard"}>
                 <li
-                  className={`${
-                    tab === "dashboard"
+                  className={`${tab === "dashboard"
                       ? "bg-primary-blue text-white"
                       : "bg-white text-gray-500"
-                  } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+                    } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
                 >
                   {" "}
                   <span>
@@ -92,11 +90,10 @@ const UserDashSideBar = () => {
 
               <Link to={"/user-dashboard?tab=myevents"}>
                 <li
-                  className={`${
-                    tab === "myevents"
+                  className={`${tab === "myevents"
                       ? "bg-primary-blue text-white"
                       : "bg-white text-gray-500"
-                  } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+                    } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
                 >
                   {" "}
                   <span>
@@ -109,11 +106,10 @@ const UserDashSideBar = () => {
 
               <Link to={"/user-dashboard?tab=event"}>
                 <li
-                  className={`${
-                    tab === "event"
+                  className={`${tab === "event"
                       ? "bg-primary-blue text-white"
                       : "bg-white text-gray-500"
-                  } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+                    } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
                 >
                   {" "}
                   <span>
@@ -129,11 +125,10 @@ const UserDashSideBar = () => {
           {currentUser.role === "attendee" ? (
             <Link to={"/user-dashboard?tab=my"}>
               <li
-                className={`${
-                  tab === "my"
+                className={`${tab === "my"
                     ? "bg-primary-blue text-white"
                     : "bg-white text-gray-500"
-                } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+                  } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
               >
                 {" "}
                 <span>
@@ -147,11 +142,10 @@ const UserDashSideBar = () => {
 
           <Link to={"/user-dashboard?tab=profile"}>
             <li
-              className={`${
-                tab === "profile"
+              className={`${tab === "profile"
                   ? "bg-primary-blue text-white"
                   : "bg-white text-gray-500"
-              } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
+                } flex cursor-pointer items-center px-4 py-3  rounded-md hover:bg-primary-blue hover:text-white text-gray-500 transition duration-200`}
             >
               <span>
                 <Settings className="w-5 h-5 mr-2" />

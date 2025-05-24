@@ -20,29 +20,65 @@ const Signin = () => {
     const [formData, setFormData] = useState({})
     const [isHovered, setIsHovered] = useState(false);
 
+    // Add validation states
+    const [errors, setErrors] = useState({
+        email: '',
+        password: ''
+    });
+
     const { loading: isLoading, error: errorMessage } = useSelector((state) => ({
         loading: state.user?.loading || false,
         error: state.user?.error || null
     }))
 
     const userState = useSelector(state => state.user)
-    console.log(userState);
-
-
-    console.log(formData);
-
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.id]: e.target.value.trim() })
+        const { id, value } = e.target;
+        setFormData({ ...formData, [id]: value.trim() });
+
+        // Clear error when user types
+        setErrors({
+            ...errors,
+            [id]: ''
+        });
+    }
+
+    // Email validation function
+    const validateEmail = (email) => {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+    }
+
+    const validateForm = () => {
+        let valid = true;
+        const newErrors = { email: '', password: '' };
+
+        // Validate email
+        if (!formData.email) {
+            newErrors.email = 'Email is required';
+            valid = false;
+        } else if (!validateEmail(formData.email)) {
+            newErrors.email = 'Please enter a valid email address';
+            valid = false;
+        }
+
+        // Validate password
+        if (!formData.password) {
+            newErrors.password = 'Password is required';
+            valid = false;
+        }
+
+        setErrors(newErrors);
+        return valid;
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.email || formData.email.trim() === "" ||
-            !formData.password || formData.password.trim() === "") {
-            toast.error("Please fill up all the fields!")
-            dispatch(signInFailure("Please fill up all the fields!"))
+        // Validate form before submission
+        if (!validateForm()) {
+            return;
         }
 
         try {
@@ -58,20 +94,18 @@ const Signin = () => {
 
             const data = await res.json();
 
-            console.log(data);
-
             if (!res.ok) {
                 toast.error(data.message)
-                console.log("Sign up error response: ", data);
-                dispatch(signInFailure(data.message || "Signup failed"))
+                console.log("Sign in error response: ", data);
+                dispatch(signInFailure(data.message || "Sign in failed"))
             } else {
-                toast.success("Signed up successfully")
+                toast.success("Signed in successfully")
                 dispatch(signInSuccess(data.data))
                 navigate("/")
             }
         } catch (error) {
             dispatch(signInFailure(error.message || "An unexpected error occurred"))
-            console.log("Sign up catch error: ", error);
+            console.log("Sign in catch error: ", error);
         }
     }
 
@@ -79,75 +113,123 @@ const Signin = () => {
         if (userState.currentUser) {
             navigate("/")
         }
-    }, [useState])
+    }, [userState.currentUser])
 
     return (
-        <main className="min-h-screen w-full flex mx-auto justify-center items-center text-center">
+        <main className="min-h-screen w-full flex mx-auto bg-white">
             <Toaster position='bottom-right' />
-            
-            {/* Image Section */}
-            <div className='hidden relative lg:flex w-full h-screen max-h-screen max-w-screen p-2'>
-                <img className='w-full h-full object-cover rounded-3xl' src={AuthHeroImg} alt="Auth Background" />
 
-                <Link to={"/"}>
-                    <button className='absolute bg-white/15 right-8 top-8 py-1 px-3 rounded-full text-white backdrop-filter backdrop-blur-xl border border-gray-500 flex gap-2 items-center'>Back to website
-                        <ArrowRight className='w-5 h-5' />
-                    </button>
-                </Link>
-            </div>
+            {/* Left Form Section */}
+            <div className='flex w-full lg:w-1/2 py-8 px-8 md:px-16 flex-col items-center justify-center'>
+                <div className='w-full max-w-md'>
+                    <div className="mb-8 flex flex-col items-center">
+                        <img src={Logo} className='w-12 h-12 mb-4' alt="Logo" />
+                        <h2 className='text-2xl font-bold text-gray-800'>Welcome back</h2>
+                        <p className='text-gray-500 mt-2'>Sign in to your account to continue</p>
+                    </div>
 
-            {/* Form Section */}
-            <div className='flex py-4 px-12 flex-col w-full max-w-md items-center gap-4 lg:max-w-full'>
-                <form onSubmit={handleSubmit} className='flex flex-col w-full max-w-sm items-center gap-4'>
-                    <img src={Logo} className='w-8' alt="Logo" />
-                    <h2 className='text-xl text-slate-900 font-semibold'>Welcome back</h2>
-                    <p className='text-slate-500'>Let's sign you in</p>
-
-                    <div className='flex flex-col gap-3 mt-4 w-full items-start'>
-
-                        <div className='flex flex-col gap-1 w-full items-start'>
-                            <label
-                                htmlFor="email"
-                                className='text-slate-500'>Email</label>
-                            <input
-                                type='email'
-                                id='email'
-                                onChange={(e) => handleChange(e)}
-                                placeholder='Johndoe1@example.com' className='px-2 py-1.5 rounded-md w-full bg-transparent border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 text-slate-700 transition duration-300' />
-                        </div>
-                        <div className='flex flex-col gap-1 w-full items-start'>
-                            <label
-                                htmlFor='password'
-                                className='text-slate-500'>Password</label>
-                            <div className='w-full relative'>
+                    <form onSubmit={handleSubmit} className='space-y-6 w-full'>
+                        <div className='space-y-4'>
+                            <div>
+                                <label htmlFor="email" className='block text-sm font-medium text-gray-700 mb-1'>
+                                    Email
+                                </label>
                                 <input
-                                    id='password'
-                                    type={showPassword ? "text" : "password"}
-                                    onChange={(e) => handleChange(e)} placeholder='********' className='px-2 py-1.5 rounded-md w-full bg-transparent border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 text-slate-700 transition duration-300' />
-                                <button className='absolute flex items-center justify-center right-3 inset-y-0' onClick={() => setShowPassword(!showPassword)}>
-                                    {showPassword ? <Eye className='w-4 h-4 text-slate-500 hover:text-slate-700 transition duration-300' /> : <EyeOff className='w-4 h-4 hover:text-slate-700 transition duration-300 text-slate-500' />}
-                                </button>
+                                    type='email'
+                                    id='email'
+                                    onChange={handleChange}
+                                    placeholder='you@example.com'
+                                    className={`w-full px-4 py-3 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-primary-blue transition duration-200`}
+                                />
+                                {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+                            </div>
+
+                            <div>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label htmlFor='password' className='block text-sm font-medium text-gray-700'>
+                                        Password
+                                    </label>
+                                    <a href="#" className="text-sm text-primary-blue hover:text-hover-blue">
+                                        Forgot password?
+                                    </a>
+                                </div>
+                                <div className='relative'>
+                                    <input
+                                        id='password'
+                                        type={showPassword ? "text" : "password"}
+                                        onChange={handleChange}
+                                        placeholder='••••••••'
+                                        className={`w-full px-4 py-3 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-primary-blue transition duration-200`}
+                                    />
+                                    <button
+                                        type="button"
+                                        className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700'
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ?
+                                            <Eye className='w-5 h-5' /> :
+                                            <EyeOff className='w-5 h-5' />
+                                        }
+                                    </button>
+                                </div>
+                                {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
                             </div>
                         </div>
-                    </div>
 
-                    <div className='w-full flex flex-col gap-2 items-center'>
-                        <button type='submit'
-                            onMouseEnter={() => setIsHovered(true)}
-                            onMouseLeave={() => setIsHovered(false)}
-                            className={`bg-primary w-full justify-center h-12 text-white  px-6 rounded-full shadow-md hover:bg-white border-2 border-black hover:text-black transition-all duration-300 flex items-center gap-4`}>
-                            {
-                                isLoading ? <SyncLoader
-                                    size={8}
-                                    speedMultiplier={0.68} color={isHovered ? "#000000" : "#ffffff"} /> : "Sign in"
-                            }
+                        <button
+                            type='submit'
+                            disabled={isLoading}
+                            className={`w-full bg-primary-blue hover:bg-hover-blue text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center`}
+                        >
+                            {isLoading ? (
+                                <SyncLoader size={8} color="#ffffff" />
+                            ) : (
+                                'Sign in'
+                            )}
                         </button>
-                        <p className='text-slate-500'>or</p>
-                    </div>
+                    </form>
 
-                </form>
-                <GoogleAuth />
-                <p className='text-slate-600'>Don't have an account? <Link to={"/sign-up"}><span className='text-black underline'>Sign up</span></Link></p>
+
+                    <div className="relative flex items-center justify-center mt-6">
+                        <div className="border-t border-gray-300 absolute w-full"></div>
+                        <div className="bg-white px-4 relative text-sm text-gray-500">or continue with</div>
+                    </div>
+                    <GoogleAuth />
+                    <p className='text-center text-gray-600 mt-6'>
+                        Don't have an account?
+                        <Link to={"/sign-up"}>
+                            <span className='text-primary-blue hover:text-hover-blue ml-1 font-medium'>
+                                Sign up
+                            </span>
+                        </Link>
+                    </p>
+                </div>
+            </div>
+
+            {/* Right Image Section */}
+            <div className='hidden lg:block w-1/2 bg-gray-100'>
+                <div className='h-full w-full relative overflow-hidden'>
+                    <img
+                        className='w-full h-full object-cover'
+                        src={AuthHeroImg}
+                        alt="Auth Background"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent"></div>
+
+                    <Link to={"/"} className="absolute top-8 right-8">
+                        <button className='bg-white/20 backdrop-blur-md py-2 px-4 rounded-full text-white border border-white/30 flex items-center gap-2 hover:bg-white/30 transition duration-200'>
+                            Back to website
+                            <ArrowRight className='w-4 h-4' />
+                        </button>
+                    </Link>
+
+                    <div className="absolute bottom-12 left-12 max-w-md">
+                        <h2 className="text-white text-3xl font-bold mb-4">Discover Amazing Events</h2>
+                        <p className="text-white/80 text-lg">
+                            Join thousands of attendees and find the perfect events for you.
+                        </p>
+                    </div>
+                </div>
             </div>
         </main>
     )

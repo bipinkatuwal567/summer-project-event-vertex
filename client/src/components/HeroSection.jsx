@@ -13,9 +13,7 @@ const HeroSection = () => {
             Experience Events Like Never Before.
           </h2>
           <p className="max-w-2xl text-lg md:text-xl text-gray-700">
-            Lorem ipsum dolor sit amet consectetur. Ac enim tristique blandit
-            fringilla enim consequat. Odio pellentesque aliquam scelerisque elit
-            leo.
+            Discover, book, and attend the most exciting events in your area. From concerts and workshops to conferences and exhibitions, Event Vertex brings you seamless event experiences with just a few clicks.
           </p>
         </div>
         <div className="flex flex-col items-center space-y-10">
