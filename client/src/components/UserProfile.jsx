@@ -44,7 +44,7 @@ const UserProfile = () => {
 
   const uploadImage = async () => {
     if (!image) return null; // No image selected return early
-    
+
     try {
       toast.loading('Uploading image...');
       const data = new FormData();
@@ -81,7 +81,7 @@ const UserProfile = () => {
 
     try {
       let imageURLToSave = currentUser.profilePicture;
-      
+
       if (image) {
         const uploadedImageUrl = await uploadImage();
         if (uploadedImageUrl) {
@@ -121,53 +121,53 @@ const UserProfile = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <Toaster position='bottom-right' />
-      
+
       {/* Header */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 font-marcellus">Account Settings</h2>
+      <div className="bg-white rounded-2xl shadow-sm pb-6 mb-6">
+        <h2 className="text-3xl font-bold mb-6 text-start">Account Settings</h2>
         <p className="text-gray-500 mt-1">Manage your profile information and account preferences</p>
       </div>
-      
+
       {/* Profile Content */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
         {/* Profile Picture Section */}
         <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-8 flex flex-col items-center justify-center border-b border-gray-100">
           <div className="relative group">
-            <img 
-              src={imageUrl || currentUser?.profilePicture} 
-              alt="Profile" 
+            <img
+              src={imageUrl || currentUser?.profilePicture}
+              alt="Profile"
               className="w-32 h-32 object-cover rounded-full border-4 border-white shadow-md"
             />
-            <div 
-              onClick={() => imageRef.current.click()} 
+            <div
+              onClick={() => imageRef.current.click()}
               className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
             >
               <Upload className="text-white" size={24} />
             </div>
           </div>
-          
-          <input 
-            className='hidden' 
-            type="file" 
-            accept='image/*' 
-            name="image" 
-            id="image" 
-            ref={imageRef} 
-            onChange={handleImageUpload} 
+
+          <input
+            className='hidden'
+            type="file"
+            accept='image/*'
+            name="image"
+            id="image"
+            ref={imageRef}
+            onChange={handleImageUpload}
           />
-          
-          <button 
+
+          <button
             onClick={() => imageRef.current.click()}
             className="mt-4 text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1"
           >
             <Upload size={14} /> Change Photo
           </button>
-          
+
           {imageFileUploadError && (
             <p className="text-red-500 text-xs mt-2">{imageFileUploadError}</p>
           )}
         </div>
-        
+
         {/* Form Section */}
         <div className="p-8">
           <div className="space-y-6">
@@ -177,63 +177,63 @@ const UserProfile = () => {
                 <User size={16} className="mr-2 text-indigo-600" />
                 Username
               </label>
-              <input 
-                type="text" 
-                id="username" 
+              <input
+                type="text"
+                id="username"
                 className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                defaultValue={currentUser?.username} 
-                onChange={handleChange} 
+                defaultValue={currentUser?.username}
+                onChange={handleChange}
               />
             </div>
-            
+
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="flex items-center text-sm font-medium text-gray-700 mb-1">
                 <Mail size={16} className="mr-2 text-indigo-600" />
                 Email Address
               </label>
-              <input 
-                type="email" 
-                id="email" 
+              <input
+                type="email"
+                id="email"
                 className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                defaultValue={currentUser?.email} 
-                onChange={handleChange} 
+                defaultValue={currentUser?.email}
+                onChange={handleChange}
               />
             </div>
-            
+
             {/* Password Field */}
             <div>
               <label htmlFor="password" className="flex items-center text-sm font-medium text-gray-700 mb-1">
                 <Lock size={16} className="mr-2 text-indigo-600" />
                 Password
               </label>
-              <input 
-                type="password" 
-                id="password" 
+              <input
+                type="password"
+                id="password"
                 className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter new password to change" 
-                onChange={handleChange} 
+                placeholder="Enter new password to change"
+                onChange={handleChange}
               />
               <p className="text-xs text-gray-500 mt-1">Leave blank to keep your current password</p>
             </div>
-            
+
             {/* Status Messages */}
             {updateUserSuccess && (
               <div className="p-3 bg-green-50 border border-green-100 text-green-700 rounded-lg text-sm">
                 {updateUserSuccess}
               </div>
             )}
-            
+
             {updateUserError && (
               <div className="p-3 bg-red-50 border border-red-100 text-red-700 rounded-lg text-sm">
                 {updateUserError}
               </div>
             )}
-            
+
             {/* Submit Button */}
             <div className="pt-4 border-t border-gray-100">
-              <button 
-                onClick={handleSubmit} 
+              <button
+                onClick={handleSubmit}
                 disabled={isSubmitting}
                 className="px-6 py-3 bg-primary-blue hover:bg-hover-blue text-white font-medium rounded-lg transition duration-300 flex items-center gap-2"
               >

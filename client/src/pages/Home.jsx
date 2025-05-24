@@ -1,19 +1,34 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { motion } from "framer-motion";
+import { Calendar, MapPin, ChevronRight, TrendingUp } from "lucide-react";
 import RecommendedEvents from "../components/RecommendedEvents";
-import HeroSection from '../components/HeroSection.jsx'
-import Carousel from '../components/Carousel.jsx'
-import EventList from '../components/EventList.jsx'
+import HeroSection from '../components/HeroSection';
+import EventList from '../components/EventList';
+import NewsletterSignup from '../components/NewsletterSignup';
+import Testimonials from '../components/Testimonials';
 
 const Home = () => {
   const { currentUser } = useSelector(state => state.user);
   
   return (
-    <div className="w-full">
+    <div className="w-full bg-white">
+      {/* Hero Section */}
       <HeroSection />
-      <Carousel />
+      
+      {/* Personalized Recommendations */}
       {currentUser && <RecommendedEvents />}
-      <EventList />
+      
+      {/* Main Event List - with ID for scrolling */}
+      <div id="event-list-section">
+        <EventList />
+      </div>
+      
+      {/* Testimonials */}
+      <Testimonials />
+      
+      {/* Newsletter Signup */}
+      <NewsletterSignup />
     </div>
   );
 };

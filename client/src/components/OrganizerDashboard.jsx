@@ -110,7 +110,7 @@ const OrganizerDashboard = () => {
           <div className="bg-indigo-100 p-3 rounded-xl">
             <LayoutDashboard size={24} className="text-indigo-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 font-marcellus">Analytics Dashboard</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Analytics Dashboard</h2>
         </div>
 
         {/* Time Filter Dropdown */}
@@ -448,7 +448,7 @@ const DashboardSection = ({ title, icon, children, fullWidth }) => (
   <div className={fullWidth ? "col-span-1 lg:col-span-2" : ""}>
     <div className="flex items-center gap-2 mb-4">
       {icon}
-      <h3 className="text-xl font-semibold text-gray-800 font-marcellus">{title}</h3>
+      <h3 className="text-xl font-semibold text-gray-800">{title}</h3>
     </div>
     <div className="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition">{children}</div>
   </div>

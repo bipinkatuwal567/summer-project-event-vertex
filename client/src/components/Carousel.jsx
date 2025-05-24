@@ -42,7 +42,7 @@ const Carousel = () => {
   }, [rerender, xTranslation, duration, width]);
 
   return (
-    <div className="relative w-full bg-white overflow-hidden py-8">
+    <div className="relative w-full overflow-hidden py-8 pb-16">
       <div ref={ref} className="w-max flex gap-4">
         <motion.div
           className="flex gap-4 will-change-transform"

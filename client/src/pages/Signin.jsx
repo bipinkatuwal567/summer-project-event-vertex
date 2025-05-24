@@ -145,14 +145,7 @@ const Signin = () => {
                             </div>
 
                             <div>
-                                <div className="flex items-center justify-between mb-1">
-                                    <label htmlFor='password' className='block text-sm font-medium text-gray-700'>
-                                        Password
-                                    </label>
-                                    <a href="#" className="text-sm text-primary-blue hover:text-hover-blue">
-                                        Forgot password?
-                                    </a>
-                                </div>
+                            
                                 <div className='relative'>
                                     <input
                                         id='password'

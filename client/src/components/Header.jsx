@@ -15,19 +15,15 @@ const Header = () => {
             <Link to={"/"}>
                 <img src={Logo} className='w-8' alt="Logo" />
             </Link>
-            <div className='flex gap-12'>
-                {/* <a className='hover:underline' href="#">Home</a>
-                <a className='hover:underline' href="#">Events</a>
-                <a className='hover:underline' href="#">Create an event</a>
-                <a className='hover:underline' href="#">About us</a> */}
-            </div>
             {
                 currentUser ?
                     <>
-                       <Avatar />
+                        <Avatar />
                     </>
-                    : <Link to={"/sign-up"}>
-                        <Button title={"Register"} />
+                    : <Link to="/sign-up" className="block">
+                        <button className="h-12 bg-primary text-white px-6 rounded-full shadow-md border-2 border-transparent hover:border-white hover:bg-primary/80 transition-all duration-300 flex items-center gap-2 group">
+                            <span>Register</span>
+                        </button>
                     </Link>
             }
 

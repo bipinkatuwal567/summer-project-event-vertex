@@ -46,12 +46,12 @@ const RecommendedEvents = () => {
 
   return (
     <div className="w-full py-8 px-8 bg-white">
-      <h2 className="text-2xl font-semibold mb-4">Recommended For You</h2>
-      <div className="flex space-x-4 overflow-x-auto pb-4">
+      <h2 className="text-3xl font-bold mb-6 text-start">Recommended For You</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-">
         {recommendations.map((event) => (
           <div
             key={event._id}
-            className="min-w-[280px] bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-[1.02]"
+            className="max-w-md bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-[1.02]"
             onClick={() => navigate(`/events/${event._id}`)}
           >
             <div className="h-40 overflow-hidden">
