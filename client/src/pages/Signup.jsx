@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router';
 import SyncLoader from "react-spinners/SyncLoader";
 import { useSelector } from 'react-redux';
 import GoogleAuth from '../components/GoogleAuth';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -29,6 +30,7 @@ const Signup = () => {
             !formData.email || formData.email.trim() === "" ||
             !formData.password || formData.password.trim() === "") {
             setErrorMessage("Please fill up all the fields!")
+            return;
         }
 
         try {
@@ -55,10 +57,10 @@ const Signup = () => {
 
                 setErrorMessage(data.message || "Signup failed")
                 return;
+            } else {
+                setIsLoading(false);
+                navigate("/sign-in")
             }
-
-            setIsLoading(false);
-            navigate("/sign-in")
         } catch (error) {
             setIsLoading(false)
             console.log("Sign up catch error: ", error);
