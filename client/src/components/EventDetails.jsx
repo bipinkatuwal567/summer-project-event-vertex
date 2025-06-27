@@ -14,6 +14,35 @@ import { useNavigate, useParams } from "react-router";
 import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 
+// Poll booking status while waiting for payment
+function useBookingStatus(bookingId) {
+  const [expired, setExpired] = useState(false);
+
+  useEffect(() => {
+    if (!bookingId) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/bookings/${bookingId}`);
+        if (!res.ok) {
+          setExpired(true);
+          clearInterval(interval);
+          return;
+        }
+        const data = await res.json();
+        if (data.paymentStatus !== "Pending") {
+          setExpired(true);
+          clearInterval(interval);
+        }
+      } catch {
+        setExpired(true);
+        clearInterval(interval);
+      }
+    }, 30000); // check every 30 seconds
+    return () => clearInterval(interval);
+  }, [bookingId]);
+  return expired;
+}
+
 const EventDetails = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
@@ -23,7 +52,21 @@ const EventDetails = () => {
   const navigate = useNavigate();
   const { currentUser } = useSelector(state => state.user);
   const [isRegistering, setIsRegistering] = useState(false);
-  
+  const [bookingIdForPolling, setBookingIdForPolling] = useState(null);
+  const [bookingCreatedAt, setBookingCreatedAt] = useState(null);
+  const expired = useBookingStatus(bookingIdForPolling);
+  const [countdown, setCountdown] = useState(1 * 60); // 15 minutes in seconds
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!bookingCreatedAt) return;
+    setCountdown(1 * 60 - Math.floor((Date.now() - new Date(bookingCreatedAt)) / 1000));
+    const interval = setInterval(() => {
+      setCountdown(prev => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [bookingCreatedAt]);
+
   const handleRegistration = async () => {
     if (!currentUser) {
       toast.error("Please sign in to register for this event");
@@ -39,23 +82,50 @@ const EventDetails = () => {
     
     try {
       if (ticketType.type !== "Free") {
-        const totalPrice = quantity * ticketType.price;
+        // Step 1: Create booking first
+        let bookingId = null;
+        let totalPrice = quantity * ticketType.price;
+        const bookingRes = await fetch("/api/bookings/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            eventId: event._id,
+            ticketType: ticketType.type,
+            quantity,
+          }),
+        });
+        const bookingData = await bookingRes.json();
+        if (!bookingRes.ok) {
+          toast.error(bookingData.message || "Could not create booking");
+          setIsRegistering(false);
+          return;
+        }
+        bookingId = bookingData.booking._id;
+        setBookingIdForPolling(bookingId); // Start polling after booking is created
+        setBookingCreatedAt(bookingData.booking.createdAt); // Set booking creation time for countdown
+        // Store bookingId and ticket info for use after payment
         localStorage.setItem('ticketinfo', JSON.stringify({
           eventId: event._id,
           ticketType,
           quantity,
+          bookingId,
         }));
+        // Step 2: Initiate eSewa payment
         try {
           const uuid = new Date().getTime().toString().slice(-6);
+          const successUrl = `${import.meta.env.VITE_URL}/esewa/purchase-success?bookingId=${bookingId}`;
+          const failUrl = `${import.meta.env.VITE_URL}/esewa/purchase-fail?bookingId=${bookingId}`;
           const jsonData = {
             amount: totalPrice.toFixed(2).toString(),
-            failure_url: `${import.meta.env.VITE_URL}/esewa/purchase-fail`,
+            failure_url: failUrl,
             product_delivery_charge: "0",
             product_service_charge: "0",
-            product_code: "EPAYTEST",
+            product_code: "EPAYTEST", // Use test product code for sandbox
             signature: "",
             signed_field_names: "total_amount,transaction_uuid,product_code",
-            success_url: `${import.meta.env.VITE_URL}/esewa/purchase-success`,
+            success_url: successUrl,
             tax_amount: "0",
             total_amount: totalPrice.toFixed(2).toString(),
             transaction_uuid: uuid,
@@ -152,6 +222,49 @@ const EventDetails = () => {
 
   if (!event) {
     return <p className="text-center mt-10 font-medium">Loading event...</p>;
+  }
+
+  // Show expired message if booking is auto-canceled
+  if (expired) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white text-black">
+        <div className="bg-white p-6 rounded-xl shadow-md text-center max-w-md border border-gray-200">
+          <h2 className="text-2xl font-bold mb-3">Booking Expired</h2>
+          <p className="text-base mb-4">
+            Your booking has expired due to non-payment. Please try again.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-5 py-2 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-gray-800 transition-all"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show countdown timer if booking is pending
+  if (bookingIdForPolling && bookingCreatedAt && !expired) {
+    const min = Math.floor(countdown / 60);
+    const sec = countdown % 60;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white text-black">
+        <div className="bg-white p-6 rounded-xl shadow-md text-center max-w-md border border-gray-200">
+          <h2 className="text-2xl font-bold mb-3">Complete Your Payment</h2>
+          <p className="text-base mb-4">
+            Please complete your payment within <span className="font-bold">{min}:{sec.toString().padStart(2, '0')}</span> minutes.<br/>
+            Your booking will be auto-cancelled if payment is not completed in time.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-5 py-2 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-gray-800 transition-all"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

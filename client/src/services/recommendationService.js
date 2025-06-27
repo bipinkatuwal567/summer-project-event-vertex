@@ -18,7 +18,6 @@ export const fetchRecommendedEvents = async () => {
         "Content-Type": "application/json",
       },
     });
-    console.log(response, "REsponse");
     
     if (!response.ok) {
       throw new Error("Failed to fetch recommendations");

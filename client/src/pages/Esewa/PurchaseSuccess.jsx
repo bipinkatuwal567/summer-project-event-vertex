@@ -176,21 +176,46 @@ const PurchaseSuccess = () => {
     if (hasRun.current) return;
     hasRun.current = true;
 
-    const createTicket = async () => {
+    const updateBookingAfterPayment = async () => {
       try {
+        // Get bookingId from localStorage or from eSewa response (product_code)
+        let bookingId = null;
+        if (parsedTicket && parsedTicket.bookingId) {
+          bookingId = parsedTicket.bookingId;
+        } else {
+          // Optionally, parse from eSewa response if available
+          const productCode = searchParams.get("product_code");
+          if (productCode) bookingId = productCode;
+        }
+        if (!bookingId) {
+          setError(true);
+          setLoading(false);
+          setIsSuccess(false);
+          toast.error("Booking ID not found. Please try again.");
+          return;
+        }
+        // Optionally decode eSewa data if it's base64 encoded JSON
+        let decodedEsewaData = esewaData;
+        try {
+          if (esewaData && typeof esewaData === "string") {
+            // Try to decode base64 JSON if possible
+            const decoded = atob(esewaData);
+            decodedEsewaData = JSON.parse(decoded);
+          }
+        } catch (e) {
+          // If not base64 or not JSON, just send as is
+          decodedEsewaData = esewaData;
+        }
         const res = await fetch("/api/bookings/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            eventId: parsedTicket.eventId,
-            ticketType: parsedTicket.ticketType.type,
-            quantity: parsedTicket.quantity,
-            esewaData,
+            bookingId,
+            esewaData: decodedEsewaData,
           }),
         });
-
         const data = await res.json();
         if (res.ok) {
           toast.success("Successfully registered!");
@@ -237,7 +262,7 @@ const PurchaseSuccess = () => {
       }
     };
 
-    createTicket();
+    updateBookingAfterPayment();
   }, []);
 
   // QR Code component for display in the UI

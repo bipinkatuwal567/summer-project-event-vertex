@@ -28,21 +28,33 @@ const EventForm = () => {
     if (!uploadedImageURL) return "Please upload a banner image.";
 
     for (let ticket of tickets) {
-      if (!ticket.availableSeats || ticket.availableSeats < 0) {
+      if (ticket.availableSeats === undefined || ticket.availableSeats === null || ticket.availableSeats < 0) {
         return `${ticket.type} available seats must be a valid number.`;
       }
-      if (ticket.type !== "Free" && (!ticket.price || ticket.price < 0)) {
+      // Only validate price if availableSeats > 0
+      if (ticket.availableSeats > 0 && ticket.type !== "Free" && (!ticket.price || ticket.price < 0)) {
         return `${ticket.type} price must be a valid number.`;
       }
     }
-
     return null;
   };
 
   const handleTicketChange = (index, field, value) => {
     const newTickets = [...tickets];
-    newTickets[index][field] =
-      field === "price" || field === "availableSeats" ? Number(value) : value;
+    if (field === "availableSeats") {
+      newTickets[index][field] = Number(value);
+      // If availableSeats is set to 0, clear price
+      if (Number(value) === 0) {
+        newTickets[index].price = "";
+      }
+    } else if (field === "price") {
+      // Only allow price entry if availableSeats > 0
+      if (newTickets[index].availableSeats > 0) {
+        newTickets[index][field] = Number(value);
+      }
+    } else {
+      newTickets[index][field] = value;
+    }
     setTickets(newTickets);
   };
 
@@ -122,19 +134,19 @@ const EventForm = () => {
         toast.success("Event created successfully!");
         // reset form here
         // ✅ Reset form here
-      setTitle("");
-      setDescription("");
-      setDate("");
-      setLocation("");
-      setCategory("Technology");
-      setTickets([
-        { type: "VIP", price: "", availableSeats: "" },
-        { type: "General", price: "", availableSeats: "" },
-        { type: "Free", price: 0, availableSeats: "" },
-      ]);
-      setImageFile(null);
-      setPreviewImage(null);
-      setUploadedImageURL("");
+        setTitle("");
+        setDescription("");
+        setDate("");
+        setLocation("");
+        setCategory("Technology");
+        setTickets([
+          { type: "VIP", price: "", availableSeats: "" },
+          { type: "General", price: "", availableSeats: "" },
+          { type: "Free", price: 0, availableSeats: "" },
+        ]);
+        setImageFile(null);
+        setPreviewImage(null);
+        setUploadedImageURL("");
       } else {
         toast.error(data.message || "Something went wrong");
       }
@@ -252,32 +264,29 @@ const EventForm = () => {
             {tickets.map((ticket, index) => (
               <div key={index} className="flex flex-wrap items-center gap-4 p-3 bg-white rounded-lg shadow-sm">
                 <span className="w-20 font-medium text-gray-700">{ticket.type}</span>
-                {ticket.type !== "Free" && (
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Price ($)</label>
-                    <input
-                      type="number"
-                      placeholder="Price"
-                      value={ticket.price}
-                      onChange={(e) =>
-                        handleTicketChange(index, "price", e.target.value)
-                      }
-                      className="p-2 border border-gray-300 rounded-lg w-28 focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
-                    />
-                  </div>
-                )}
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">Available Seats</label>
                   <input
                     type="number"
                     placeholder="Seats"
                     value={ticket.availableSeats}
-                    onChange={(e) =>
-                      handleTicketChange(index, "availableSeats", e.target.value)
-                    }
+                    onChange={(e) => handleTicketChange(index, "availableSeats", e.target.value)}
                     className="p-2 border border-gray-300 rounded-lg w-28 focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
                   />
                 </div>
+                {ticket.type !== "Free" && (
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Price (Rs.)</label>
+                    <input
+                      type="number"
+                      placeholder="Price"
+                      value={ticket.price}
+                      onChange={(e) => handleTicketChange(index, "price", e.target.value)}
+                      className="p-2 border border-gray-300 rounded-lg w-28 focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
+                      disabled={ticket.availableSeats === 0}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>

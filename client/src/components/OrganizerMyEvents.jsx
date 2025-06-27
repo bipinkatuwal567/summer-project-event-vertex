@@ -23,6 +23,7 @@ const OrganizerMyEvents = () => {
         method: "GET"
       });
       const data = await res.json();
+      
       setEvents(data.data);
       setFilteredEvents(data.data);
     } catch (error) {
@@ -157,8 +158,8 @@ const OrganizerMyEvents = () => {
                   key={category}
                   onClick={() => handleCategoryChange(category)}
                   className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCategory === category
-                      ? "bg-indigo-600 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-indigo-300"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-white text-gray-700 border border-gray-200 hover:border-indigo-300"
                     }`}
                 >
                   {category}

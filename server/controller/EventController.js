@@ -44,18 +44,33 @@ export const CreateEvent = async (req, res, next) => {
   }
 
   try {
-    const { title, description, date, location, category, tickets, banner } = req.body;
+    const { title, description, date, location, category, tickets, banner } =
+      req.body;
 
     const now = new Date();
     const event = new Date(date);
 
-    if (!title || !description || !date || !location || !category || !tickets || !banner) {
+    if (
+      !title ||
+      !description ||
+      !date ||
+      !location ||
+      !category ||
+      !tickets ||
+      !banner
+    ) {
       return sendResponse(res, 400, "Missing required fields");
     }
 
     if (event.getTime() < now.getTime()) {
-      return sendResponse(res, 400, "This date is invalid")
+      return sendResponse(res, 400, "This date is invalid");
     }
+
+    // Before saving, ensure tickets with availableSeats 0 have price set to 0
+    const sanitizedTickets = tickets.map((ticket) => ({
+      ...ticket,
+      price: ticket.availableSeats === 0 ? 0 : ticket.price,
+    }));
 
     const eventStatus = getStatusFromDate(date);
     const newEvent = new Event({
@@ -64,7 +79,7 @@ export const CreateEvent = async (req, res, next) => {
       date,
       location,
       category,
-      tickets,
+      tickets: sanitizedTickets,
       banner,
       organizerId: req.user.id,
       status: eventStatus, // Auto-set based on the event date
@@ -82,21 +97,27 @@ export const CreateEvent = async (req, res, next) => {
 // Get all events
 export const GetEvents = async (req, res) => {
   try {
-    const userRole = req.user?.role || 'attendee'; // Default to 'attendee'
+    const userRole = req.user?.role || "attendee"; // Default to 'attendee'
     let events;
 
-    if (userRole === 'organizer') {
+    if (userRole === "organizer") {
       // Organizers see only their own events
-      events = await Event.find({ organizerId: req.user.id, isDeleted: false }).sort({ createdAt: -1 });
+      events = await Event.find({
+        organizerId: req.user.id,
+        isDeleted: false,
+      }).sort({ createdAt: -1 });
     } else {
       // Attendees see only upcoming or ongoing events
-      events = await Event.find({ status: { $in: ["Upcoming", "Ongoing"] }, isDeleted: false }).sort({ createdAt: -1 });
+      events = await Event.find({
+        status: { $in: ["Upcoming", "Ongoing"] },
+        isDeleted: false,
+      }).sort({ createdAt: -1 });
     }
 
     sendResponse(res, 200, "Events fetched successfully", events);
   } catch (error) {
-    console.error('Error fetching events:', error);
-    sendResponse(res, 500, 'Server error');
+    console.error("Error fetching events:", error);
+    sendResponse(res, 500, "Server error");
   }
 };
 
@@ -104,14 +125,21 @@ export const GetEvents = async (req, res) => {
 export const GetEventById = async (req, res) => {
   try {
     const { id } = req.params;
-    const event = await Event.findById(id).populate('organizerId', 'username email profilePicture');
+    const event = await Event.findById(id).populate(
+      "organizerId",
+      "username email profilePicture"
+    );
 
     if (!event) {
       return sendResponse(res, 404, "Event not found");
     }
 
     if (event.status !== "Upcoming" && event.status !== "Ongoing") {
-      return sendResponse(res, 403, "You are not authorized to view this event.");
+      return sendResponse(
+        res,
+        403,
+        "You are not authorized to view this event."
+      );
     }
 
     sendResponse(res, 200, "Event fetched successfully", event);
@@ -132,17 +160,25 @@ export const UpdateEvent = async (req, res) => {
     }
 
     if (event.organizerId.toString() !== req.user.id) {
-      return sendResponse(res, 403, "You are not authorized to edit this event.");
+      return sendResponse(
+        res,
+        403,
+        "You are not authorized to edit this event."
+      );
     }
 
-    const { title, description, date, location, category, tickets, banner } = req.body;
+    const { title, description, date, location, category, tickets, banner } =
+      req.body;
 
     event.title = title || event.title;
     event.description = description || event.description;
     event.date = date || event.date;
     event.location = location || event.location;
     event.category = category || event.category;
-    event.tickets = tickets || event.tickets;
+    event.tickets = (tickets || event.tickets).map((ticket) => ({
+      ...ticket,
+      price: ticket.availableSeats === 0 ? 0 : ticket.price,
+    }));
     event.banner = banner || event.banner;
 
     const eventStatus = getStatusFromDate(event.date);
@@ -214,7 +250,10 @@ export const SoftDeleteEvent = async (req, res) => {
     // Cancel all bookings related to this event
     await Booking.updateMany(
       { eventId: id },
-      { status: "Cancelled", cancellationReason: "Event was deleted by organizer" }
+      {
+        status: "Cancelled",
+        cancellationReason: "Event was deleted by organizer",
+      }
     );
 
     sendResponse(res, 200, "Event cancelled and bookings updated");
@@ -224,11 +263,13 @@ export const SoftDeleteEvent = async (req, res) => {
   }
 };
 
-
 // For a dedicated Organizer Dashboard, it’s cleaner and RESTful to have a separate route like: GET /api/events/organizer
 export const GetEventsByOrganizer = async (req, res) => {
   try {
-    const events = await Event.find({ organizerId: req.user.id, isDeleted: false }).sort({ createdAt: -1 });
+    const events = await Event.find({
+      organizerId: req.user.id,
+      isDeleted: false,
+    }).sort({ createdAt: -1 });
     sendResponse(res, 200, "Organizer events fetched successfully", events);
   } catch (error) {
     console.error("Error fetching organizer events:", error);
@@ -240,7 +281,6 @@ export const getBookingsForEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
 
-
     const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
@@ -250,12 +290,11 @@ export const getBookingsForEvent = async (req, res) => {
     }
 
     const bookings = await Booking.find({ eventId: eventId })
-    .populate("userId", "username email")
-    .populate('eventId', 'status');
+      .populate("userId", "username email")
+      .populate("eventId", "status");
     res.status(200).json({ success: true, data: bookings });
   } catch (err) {
     console.error("Error fetching bookings:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
-

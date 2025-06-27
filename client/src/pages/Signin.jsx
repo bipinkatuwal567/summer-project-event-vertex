@@ -118,7 +118,6 @@ const Signin = () => {
     return (
         <main className="min-h-screen w-full flex mx-auto bg-white">
             <Toaster position='bottom-right' />
-
             {/* Left Form Section */}
             <div className='flex w-full lg:w-1/2 py-8 px-8 md:px-16 flex-col items-center justify-center'>
                 <div className='w-full max-w-md'>
@@ -145,7 +144,7 @@ const Signin = () => {
                             </div>
 
                             <div>
-                            
+
                                 <div className='relative'>
                                     <input
                                         id='password'

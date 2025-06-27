@@ -14,11 +14,11 @@ const BookingsModal = ({ eventId, onClose }) => {
         const res = await fetch(`/api/event/${eventId}/bookings`, {
           method: "GET"
         });
-        
+
         if (!res.ok) {
           throw new Error("Failed to fetch bookings");
         }
-        
+
         const data = await res.json();
         setBookings(data.data);
       } catch (err) {
@@ -81,8 +81,8 @@ const BookingsModal = ({ eventId, onClose }) => {
             <div className="bg-red-50 p-4 rounded-xl text-center">
               <AlertCircle size={32} className="mx-auto mb-2 text-red-500" />
               <p className="text-red-600">{error}</p>
-              <button 
-                onClick={() => window.location.reload()} 
+              <button
+                onClick={() => window.location.reload()}
                 className="mt-3 text-sm text-indigo-600 hover:text-indigo-800"
               >
                 Try again
@@ -99,10 +99,10 @@ const BookingsModal = ({ eventId, onClose }) => {
               <p className="text-sm text-gray-500 mb-4">
                 Showing {bookings.length} booking{bookings.length !== 1 ? 's' : ''}
               </p>
-              
+
               {bookings.map((booking, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300"
                 >
                   <div className="p-5">
@@ -120,7 +120,7 @@ const BookingsModal = ({ eventId, onClose }) => {
                         </p>
                       </div>
                     </div>
-                    
+
                     {/* Booking Details */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       <div className="flex items-center gap-2">
@@ -130,7 +130,7 @@ const BookingsModal = ({ eventId, onClose }) => {
                           <p className="font-medium">{booking.ticketType}</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <CreditCard size={16} className="text-gray-400" />
                         <div>
@@ -138,7 +138,7 @@ const BookingsModal = ({ eventId, onClose }) => {
                           <p className="font-medium">Rs. {booking.totalPrice}</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <Calendar size={16} className="text-gray-400" />
                         <div>
@@ -147,17 +147,16 @@ const BookingsModal = ({ eventId, onClose }) => {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Status Badges */}
                     <div className="flex flex-wrap gap-3 mt-5 pt-4 border-t border-gray-100">
                       <div className="flex items-center">
                         <span className="text-sm font-medium text-gray-700 mr-2">Event Status:</span>
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            booking.eventId.status === "canceled"
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${booking.eventId.status === "canceled"
                               ? "bg-red-100 text-red-700"
                               : "bg-green-100 text-green-700"
-                          }`}
+                            }`}
                         >
                           {booking.eventId.status === "canceled" ? (
                             <span className="flex items-center gap-1">
@@ -172,15 +171,14 @@ const BookingsModal = ({ eventId, onClose }) => {
                           )}
                         </span>
                       </div>
-                      
+
                       <div className="flex items-center">
                         <span className="text-sm font-medium text-gray-700 mr-2">Payment:</span>
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            booking.paymentDetails.status !== "COMPLETED"
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${booking.paymentDetails.status !== "COMPLETED"
                               ? "bg-yellow-100 text-yellow-700"
                               : "bg-blue-100 text-blue-700"
-                          }`}
+                            }`}
                         >
                           {booking.paymentDetails.status}
                         </span>

@@ -145,16 +145,18 @@ export const getOrganizerStats = async (req, res) => {
       },
     ]);
 
-    // Get detailed stats for each event - Fix: Correct the available calculation
+    // Get detailed stats for each event - Fix: Use availableSeats directly for available value
     const eventStats = await Promise.all(
       events.map(async (event) => {
         const ticketStats = await Promise.all(
           event.tickets.map(async (ticket) => {
-            // Count sold tickets for this type
-            const sold = await Booking.countDocuments({
+            // Fetch all bookings for this ticket type
+            const soldBookings = await Booking.find({
               eventId: event._id,
               ticketType: ticket.type,
             });
+            // Sum the quantity field for accurate sold count
+            const sold = soldBookings.reduce((sum, b) => sum + (b.quantity || 1), 0);
 
             // Get paid bookings for revenue calculation - Fix: Check status in paymentDetails
             const paidBookings = await Booking.find({
@@ -165,19 +167,16 @@ export const getOrganizerStats = async (req, res) => {
                 { paymentStatus: { $in: ["paid", "PAID", "COMPLETE", "COMPLETED"] } }
               ]
             }).lean();
-            
             // Calculate revenue from paid bookings using totalPrice
             const revenue = paidBookings.reduce((sum, booking) => {
               return sum + (booking.totalPrice || 0);
             }, 0);
-            
-            // Fix: Use the correct field for available seats
-            const available = ticket.availableSeats || ticket.quantity || 0;
-
+            // Use availableSeats directly for available value
+            const available = ticket.availableSeats || 0;
             return {
               type: ticket.type,
               sold: sold || 0,
-              available: Math.max(0, available - sold), // Ensure it's not negative
+              available: available, // Use availableSeats directly
               revenue: revenue || 0,
             };
           })

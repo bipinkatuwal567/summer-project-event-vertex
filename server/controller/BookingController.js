@@ -17,30 +17,51 @@ export const getEventStatus = (eventDate) => {
 
 // 🧠 Utility: Auto-cancel unpaid bookings older than 15 minutes
 const autoCancelUnpaidBookings = async () => {
-  const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
-  const expiredBookings = await Booking.find({
-    paymentStatus: "Pending",
-    createdAt: { $lt: fifteenMinsAgo },
-  });
+  try {
+    console.log("auto pending start");
+    const fifteenMinsAgo = new Date(Date.now() - 1 * 60 * 1000); // 15 minutes
+    const bookingQuery = {
+      $or: [
+        { "paymentDetails.status": { $exists: false } },
+        {
+          "paymentDetails.status": {
+            $in: [null, "", "PENDING", "Pending", "pending"],
+          },
+        },
+      ],
+      createdAt: { $lt: fifteenMinsAgo },
+    };
+    console.log("Booking query for expired bookings:", bookingQuery);
+    const expiredBookings = await Booking.find(bookingQuery);
 
-  for (const booking of expiredBookings) {
-    const event = await Event.findById(booking.eventId);
-    if (!event) continue;
+    console.log("Found expired bookings:", expiredBookings.length);
 
-    const ticket = event.tickets.find((t) => t.type === booking.ticketType);
-    if (ticket) {
-      ticket.availableSeats += booking.quantity;
-      await event.save();
+    for (const booking of expiredBookings) {
+      console.log("Auto-cancelling booking:", booking._id, booking.createdAt);
+      const event = await Event.findById(booking.eventId);
+      if (!event) continue;
+
+      const ticket = event.tickets.find((t) => t.type === booking.ticketType);
+      if (ticket) {
+        ticket.availableSeats += booking.quantity;
+        await event.save();
+      }
+
+      console.log("auto pending finish");
+      await Booking.findByIdAndDelete(booking._id);
     }
-
-    await Booking.findByIdAndDelete(booking._id);
+  } catch (err) {
+    console.error("Error in autoCancelUnpaidBookings:", err);
   }
 };
 
+// Run auto-cancel every 5 minutes in the background
+setInterval(() => {
+  autoCancelUnpaidBookings();
+}, 1 * 60 * 1000); // 5 minutes
+
 // 🎟️ Event Registration
 export const registerForEvent = async (req, res) => {
-  console.log("Start", req.body);
-  
   try {
     const userId = req.user.id;
     const { role } = req.user;
@@ -51,7 +72,7 @@ export const registerForEvent = async (req, res) => {
         .json({ message: "Only attendees can register for events." });
     }
 
-    const { eventId, ticketType, quantity, esewaData } = req.body;
+    const { eventId, ticketType, quantity, esewaData, bookingId } = req.body;
 
     if (!eventId || !ticketType || !quantity) {
       return res
@@ -59,7 +80,6 @@ export const registerForEvent = async (req, res) => {
         .json({ message: "Please select any available ticket" });
     }
 
-    console.log("check unpaid");
     await autoCancelUnpaidBookings(); // Clean up before new registration
 
     const event = await Event.findById(eventId);
@@ -84,10 +104,12 @@ export const registerForEvent = async (req, res) => {
     }
 
     const totalPrice = ticket.price * quantity;
-    let paymentDetails=null
-    if (esewaData) {
+    let paymentDetails = null;
+    let newBooking;
+
+    if (esewaData && bookingId) {
+      // This is a callback after eSewa payment, update the booking
       const decryptedEsewaData = decodeBase64(esewaData);
-      console.log(decryptedEsewaData);
       paymentDetails = {
         transaction_code: decryptedEsewaData.transaction_code,
         status: decryptedEsewaData.status,
@@ -95,46 +117,70 @@ export const registerForEvent = async (req, res) => {
         transaction_uuid: decryptedEsewaData.transaction_uuid,
         product_code: decryptedEsewaData.product_code,
       };
-    }else if (totalPrice === 0) {
-      // ✅ Free ticket case — mark as confirmed
-      paymentDetails = {
-        status: "COMPLETE",
-      };
+      newBooking = await Booking.findByIdAndUpdate(
+        bookingId,
+        { paymentDetails, paymentStatus: "PAID" },
+        { new: true }
+      );
+      // No need to reduce availableSeats again
+      return res.status(200).json({
+        message: "Payment confirmed and booking updated",
+        booking: newBooking,
+      });
+    } else if (!esewaData) {
+      // Create booking with Pending status before payment
+      paymentDetails = { status: "PENDING" };
+      newBooking = new Booking({
+        userId,
+        eventId,
+        ticketType,
+        quantity,
+        ticketPrice: ticket.price,
+        totalPrice,
+        paymentDetails,
+        paymentStatus: "Pending",
+      });
+      await newBooking.save();
+      console.log("new booking created", newBooking._id);
+      ticket.availableSeats -= quantity;
+      await event.save();
+      // Return bookingId so frontend can use it after eSewa payment
+      return res.status(201).json({
+        message: "Booking created, proceed to payment",
+        booking: newBooking,
+      });
     }
-
-    console.log("new booking");
-    const newBooking = new Booking({
-      userId,
-      eventId,
-      ticketType,
-      quantity,
-      ticketPrice: ticket.price,
-      totalPrice,
-      paymentDetails,
-    });
-
-    await newBooking.save();
-
-    // ✅ Always reduce availableSeats and set Paid if free
-    ticket.availableSeats -= quantity;
-    await event.save();
-
-    res.status(201).json({
-      message: "Successfully registered for the event",
-      booking: newBooking,
-    });
+    // For free ticket case
+    if (totalPrice === 0) {
+      paymentDetails = { status: "COMPLETE" };
+      newBooking = new Booking({
+        userId,
+        eventId,
+        ticketType,
+        quantity,
+        ticketPrice: ticket.price,
+        totalPrice,
+        paymentDetails,
+        paymentStatus: "PAID",
+      });
+      await newBooking.save();
+      ticket.availableSeats -= quantity;
+      await event.save();
+      return res.status(201).json({
+        message: "Successfully registered for the event",
+        booking: newBooking,
+      });
+    }
   } catch (error) {
     console.error("Booking error:", error);
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 
-
 export const getMyBookings = async (req, res) => {
   try {
     const userId = req.user.id;
     console.log(userId);
-    
 
     const bookings = await Booking.find({ userId })
       .populate({
@@ -150,3 +196,13 @@ export const getMyBookings = async (req, res) => {
   }
 };
 
+// GET /api/bookings/:id - Get booking by ID (for polling status)
+export const getBookingById = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+    res.status(200).json(booking);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};

@@ -53,7 +53,17 @@ const eventSchema = mongoose.Schema(
         },
         availableSeats: {
           type: Number,
-          required: true,
+          required: function () {
+            return this.type !== "Free";
+          },
+          // For Free tickets, availableSeats is optional, but if provided, must be >= 0
+          validate: {
+            validator: function (v) {
+              if (this.type === "Free") return v === undefined || v >= 0;
+              return v !== undefined && v >= 0;
+            },
+            message: 'Available seats must be a non-negative number.'
+          },
         },
       },
     ],

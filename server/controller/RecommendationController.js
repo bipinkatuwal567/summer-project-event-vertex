@@ -7,7 +7,7 @@ import Booking from "../model/BookingModel.js";
 export const getRecommendations = async (req, res) => {
   try {
     const userId = req.user.id;
-    
+
     // 1. Get user's past bookings with event details
     const userBookings = await Booking.find({ userId })
       .populate({
@@ -37,18 +37,34 @@ export const getRecommendations = async (req, res) => {
       })
       .limit(50);
 
-    // 4. Score and rank events based on user preferences
+    // Only apply the filter if user has preferences
+    const hasPreferences =
+      Object.values(userPreferences.categories).length > 0 ||
+      Object.values(userPreferences.organizers).length > 0 ||
+      Object.values(userPreferences.locations).length > 0;
+
     let scoredEvents = rankEventsByRelevance(upcomingEvents, userPreferences);
-    
+    if (!hasPreferences) {
+      // For new users, don't filter by relevanceScore
+      scoredEvents = upcomingEvents.map((event) => ({
+        ...event._doc,
+        relevanceScore: 1,
+      }));
+    } else {
+      scoredEvents = scoredEvents.filter(
+        (event) => event.relevanceScore > 0
+      ); // Only return relevant events
+    }
+
     // 5. Handle new users with no preferences (cold start)
     if (scoredEvents.length === 0 && upcomingEvents.length > 0) {
       console.log("New user with no preferences - providing popular events");
-      
+
       // For new users, return popular events or events happening soon
       scoredEvents = upcomingEvents
-        .map(event => ({
+        .map((event) => ({
           ...event._doc,
-          relevanceScore: 1 // Give all events a base score
+          relevanceScore: 1, // Give all events a base score
         }))
         .sort((a, b) => {
           // Sort by date (events happening sooner first)
@@ -155,4 +171,3 @@ const rankEventsByRelevance = (events, preferences) => {
     .filter((event) => event.relevanceScore > 0) // Only return relevant events
     .sort((a, b) => b.relevanceScore - a.relevanceScore); // Sort by relevance
 };
-
